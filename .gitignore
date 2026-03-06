@@ -1,0 +1,25 @@
+# ===== BACKEND =====
+backend/target/
+backend/.mvn/
+backend/*.iml
+backend/.classpath
+backend/.project
+backend/.settings/
+backend/application-local.properties
+
+# ===== FRONTEND =====
+frontend/node_modules/
+frontend/dist/
+frontend/.env
+frontend/.env.local
+
+# Secrets
+backend/src/main/resources/application.properties
+backend/.env
+.env
+
+# ===== IDE =====
+.idea/
+.vscode/
+*.iml
+*.DS_Store
