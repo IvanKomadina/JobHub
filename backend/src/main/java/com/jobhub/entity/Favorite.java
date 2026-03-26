@@ -34,7 +34,7 @@ public class Favorite {
     @Column(name = "saved_at", nullable = false, updatable = false)
     private LocalDateTime savedAt;
 
-    @Builder(access = AccessLevel.PROTECTED)
+    @Builder(access = AccessLevel.PRIVATE)
     private Favorite(Candidate candidate, JobPost jobPost) {
         this.candidate = candidate;
         this.jobPost = jobPost;

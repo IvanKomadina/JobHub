@@ -42,7 +42,7 @@ public class JobPost {
     @JoinColumn(name = "location_id")
     private Location location;
 
-    @Column(nullable = false, length = 255)
+    @Column(nullable = false)
     private String title;
 
     @Column(nullable = false, columnDefinition = "TEXT")
