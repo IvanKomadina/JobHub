@@ -1,7 +1,6 @@
 package com.jobhub.security;
 
 import jakarta.servlet.http.Cookie;
-import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
@@ -25,7 +24,7 @@ public class CookieService {
         Cookie cookie = new Cookie("refresh_token", token);
         cookie.setHttpOnly(true);
         cookie.setSecure(secure);
-        cookie.setPath("/api/auth/refresh");
+        cookie.setPath("/api/auth");
         cookie.setMaxAge((int) (maxAgeMs / 1000));
         response.addCookie(cookie);
     }
