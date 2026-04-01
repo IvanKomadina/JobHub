@@ -81,8 +81,8 @@ public class JobPost {
 
     @Builder(access = AccessLevel.PRIVATE)
     private JobPost(Employer employer, Category category, Location location, String title,
-                    String description, String requirements, EmploymentType employmentType, BigDecimal salaryMin,
-                    BigDecimal salaryMax, LocalDateTime closesAt) {
+                    String description, String requirements, EmploymentType employmentType,
+                    BigDecimal salaryMin, BigDecimal salaryMax, LocalDateTime closesAt) {
         this.employer = employer;
         this.category = category;
         this.location = location;
