@@ -56,7 +56,7 @@ public class Application {
         this.jobPost = jobPost;
         this.candidate = candidate;
         this.coverLetter = coverLetter;
-        this.status = ApplicationStatus.PENDING;
+        this.status = ApplicationStatus.DRAFT;
     }
 
     public static Application create(JobPost jobPost, Candidate candidate, String coverLetter) {
@@ -70,6 +70,12 @@ public class Application {
                 .candidate(candidate)
                 .coverLetter(coverLetter)
                 .build();
+    }
+
+    public void submit() {
+        if (this.status != ApplicationStatus.DRAFT)
+            throw new IllegalStateException("Only draft applications can be submitted");
+        this.status = ApplicationStatus.PENDING;
     }
 
     public void accept() {
