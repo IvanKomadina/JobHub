@@ -22,13 +22,12 @@ public class ResumeExperience {
     @JoinColumn(name = "resume_id", nullable = false)
     private Resume resume;
 
-    @Column(nullable = false, length = 255)
+    @Column(nullable = false)
     private String company;
 
-    @Column(nullable = false, length = 255)
+    @Column(nullable = false)
     private String position;
 
-    @Column(length = 255)
     private String location;
 
     @Column(name = "start_date")
@@ -94,5 +93,12 @@ public class ResumeExperience {
         this.endDate = endDate;
         this.description = description;
         this.sortOrder = sortOrder != null ? sortOrder : 0;
+    }
+
+    public boolean isCurrent() {
+        LocalDate today = LocalDate.now();
+        return startDate != null &&
+                !startDate.isAfter(today) &&
+                (endDate == null || endDate.isAfter(today));
     }
 }
