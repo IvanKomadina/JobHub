@@ -24,13 +24,13 @@ public class ResumeService {
     // RESUME
 
     @Transactional
-    public ResumeResponse createResume(AuthenticatedUser currentUser, String summary) {
+    public ResumeResponse createResume(ResumeSummaryRequest request, AuthenticatedUser currentUser) {
         Candidate candidate = getCandidateByUserId(currentUser.getUserId());
 
         if (resumeRepository.existsByCandidate_Id(candidate.getId()))
             throw new IllegalStateException("Resume already exists");
 
-        Resume resume = Resume.create(candidate, summary);
+        Resume resume = Resume.create(candidate, request.getSummary());
         resumeRepository.save(resume);
         return buildResumeResponse(resume);
     }
@@ -42,7 +42,7 @@ public class ResumeService {
     }
 
     @Transactional
-    public ResumeResponse updateSummary(UpdateSummaryRequest request, AuthenticatedUser currentUser) {
+    public ResumeResponse updateSummary(ResumeSummaryRequest request, AuthenticatedUser currentUser) {
         Resume resume = getResumeByUserId(currentUser.getUserId());
         resume.updateSummary(request.getSummary());
         return buildResumeResponse(resume);
