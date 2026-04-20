@@ -3,10 +3,13 @@ package com.jobhub.controller;
 import com.jobhub.dto.resume.*;
 import com.jobhub.entity.ResumeExperience;
 import com.jobhub.security.AuthenticatedUser;
+import com.jobhub.service.ResumePdfService;
 import com.jobhub.service.ResumeService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
@@ -17,6 +20,7 @@ import org.springframework.web.bind.annotation.*;
 public class ResumeController {
 
     private final ResumeService resumeService;
+    private final ResumePdfService resumePdfService;
 
     // RESUME
 
@@ -144,5 +148,17 @@ public class ResumeController {
             @AuthenticationPrincipal AuthenticatedUser currentUser) {
         resumeService.deleteLanguage(id, currentUser);
         return ResponseEntity.noContent().build();
+    }
+
+    // PDF download
+
+    @GetMapping("/pdf")
+    public ResponseEntity<byte[]> downloadResumePdf(
+            @AuthenticationPrincipal AuthenticatedUser currentUser) {
+        byte[] pdf = resumePdfService.generateResumePdf(currentUser);
+        return ResponseEntity.ok()
+                .header(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=\"resume.pdf\"")
+                .contentType(MediaType.APPLICATION_PDF)
+                .body(pdf);
     }
 }
