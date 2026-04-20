@@ -31,6 +31,14 @@
 	</properties>
 	<dependencies>
 
+		<!-- iText PDF -->
+		<dependency>
+			<groupId>com.itextpdf</groupId>
+			<artifactId>itext7-core</artifactId>
+			<version>8.0.4</version>
+			<type>pom</type>
+		</dependency>
+
 		<!-- AWS S3 -->
 		<dependency>
 			<groupId>software.amazon.awssdk</groupId>
