@@ -21,10 +21,10 @@ public class User {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @Column(nullable = false, unique = true, length = 255)
+    @Column(nullable = false, unique = true)
     private String email;
 
-    @Column(name = "password_hash", nullable = false, length = 255)
+    @Column(name = "password_hash", nullable = false)
     private String passwordHash;
 
     @Enumerated(EnumType.STRING)
@@ -41,6 +41,12 @@ public class User {
     @UpdateTimestamp
     @Column(name = "updated_at", nullable = false)
     private LocalDateTime updatedAt;
+
+    @OneToOne(mappedBy = "user")
+    private Candidate candidate;
+
+    @OneToOne(mappedBy = "user")
+    private Employer employer;
 
     @Builder(access = AccessLevel.PRIVATE)
     private User(String email, String passwordHash, UserRole role) {
