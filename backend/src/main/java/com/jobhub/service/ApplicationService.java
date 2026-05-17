@@ -190,6 +190,7 @@ public class ApplicationService {
         return ApplicationResponse.from(application);
     }
 
+    /*
     @Transactional
     public AssessmentResponse saveAssessment(Long applicationId, AssessmentRequest request,
                                              AuthenticatedUser currentUser) {
@@ -226,7 +227,7 @@ public class ApplicationService {
                 .orElseThrow(() -> new ResourceNotFoundException("Assessment not found"));
 
         return AssessmentResponse.from(assessment);
-    }
+    }*/
 
     @Transactional(readOnly = true)
     public List<DocumentResponse> getDocumentsForEmployer(Long applicationId,
