@@ -71,6 +71,9 @@ public class JobPost {
     @Column(name = "closes_at")
     private LocalDateTime closesAt;
 
+    /*@Column(columnDefinition = "vector(1024)")
+    private float[] embedding;*/
+
     @CreationTimestamp
     @Column(name = "created_at", nullable = false, updatable = false)
     private LocalDateTime createdAt;
@@ -153,4 +156,8 @@ public class JobPost {
         if (this.status == PostStatus.DELETED) throw new IllegalStateException("Post is already deleted");
         this.status = PostStatus.DELETED;
     }
+
+    /*public void updateEmbedding(float[] embedding) {
+        this.embedding = embedding;
+    }*/
 }

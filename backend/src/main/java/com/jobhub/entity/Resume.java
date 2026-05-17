@@ -26,6 +26,9 @@ public class Resume {
     @Column(columnDefinition = "TEXT")
     private String summary;
 
+    /*@Column(columnDefinition = "vector(1024)")
+    private float[] embedding;*/
+
     @UpdateTimestamp
     @Column(name = "updated_at", nullable = false)
     private LocalDateTime updatedAt;
@@ -53,4 +56,8 @@ public class Resume {
         }
         this.summary = summary;
     }
+
+    /*public void updateEmbedding(float[] embedding) {
+        this.embedding = embedding;
+    }*/
 }

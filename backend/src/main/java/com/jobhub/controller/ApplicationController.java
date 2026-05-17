@@ -106,7 +106,8 @@ public class ApplicationController {
                 applicationId, request, currentUser));
     }
 
-    @PostMapping("/employer/applications/{applicationId}/assessment")
+
+    /*@PostMapping("/employer/applications/{applicationId}/assessment")
     public ResponseEntity<AssessmentResponse> saveAssessment(
             @PathVariable Long applicationId,
             @Valid @RequestBody AssessmentRequest request,
@@ -120,7 +121,7 @@ public class ApplicationController {
             @PathVariable Long applicationId,
             @AuthenticationPrincipal AuthenticatedUser currentUser) {
         return ResponseEntity.ok(applicationService.getAssessment(applicationId, currentUser));
-    }
+    }*/
 
     @GetMapping("/employer/applications/{applicationId}/documents")
     public ResponseEntity<List<DocumentResponse>> getDocumentsForEmployer(

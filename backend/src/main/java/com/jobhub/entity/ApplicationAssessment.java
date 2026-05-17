@@ -5,8 +5,8 @@ import lombok.AccessLevel;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
-import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.UpdateTimestamp;
+import com.jobhub.enums.RecommendationType;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
@@ -28,6 +28,37 @@ public class ApplicationAssessment {
     @Column(name = "match_score", precision = 5, scale = 2)
     private BigDecimal matchScore;
 
+    @Column(name = "semantic_score", precision = 5, scale = 2)
+    private BigDecimal semanticScore;
+
+    @Column(name = "skills_score", precision = 5, scale = 2)
+    private BigDecimal skillsScore;
+
+    @Column(name = "experience_score", precision = 5, scale = 2)
+    private BigDecimal experienceScore;
+
+    @Column(name = "education_score", precision = 5, scale = 2)
+    private BigDecimal educationScore;
+
+    @Column(name = "skills_match", columnDefinition = "TEXT")
+    private String skillsMatch;
+
+    @Column(name = "skills_gap", columnDefinition = "TEXT")
+    private String skillsGap;
+
+    @Column(name = "experience_assessment", columnDefinition = "TEXT")
+    private String experienceAssessment;
+
+    @Column(name = "education_assessment", columnDefinition = "TEXT")
+    private String educationAssessment;
+
+    @Column(name = "explanation", columnDefinition = "TEXT")
+    private String explanation;
+
+    @Enumerated(EnumType.STRING)
+    @Column(name = "recommendation", length = 50)
+    private RecommendationType recommendation;
+
     @Column(name = "employer_notes", columnDefinition = "TEXT")
     private String employerNotes;
 
@@ -35,34 +66,89 @@ public class ApplicationAssessment {
     @Column(name = "assessed_at", nullable = false)
     private LocalDateTime assessedAt;
 
-    @Builder(access = AccessLevel.PROTECTED)
-    private ApplicationAssessment(Application application, BigDecimal matchScore, String employerNotes) {
+    @Builder(access = AccessLevel.PRIVATE)
+    private ApplicationAssessment(Application application, BigDecimal matchScore,
+                                  BigDecimal semanticScore, BigDecimal skillsScore,
+                                  BigDecimal experienceScore, BigDecimal educationScore,
+                                  String skillsMatch, String skillsGap,
+                                  String experienceAssessment, String educationAssessment,
+                                  String explanation, RecommendationType recommendation) {
         this.application = application;
         this.matchScore = matchScore;
-        this.employerNotes = employerNotes;
+        this.semanticScore = semanticScore;
+        this.skillsScore = skillsScore;
+        this.experienceScore = experienceScore;
+        this.educationScore = educationScore;
+        this.skillsMatch = skillsMatch;
+        this.skillsGap = skillsGap;
+        this.experienceAssessment = experienceAssessment;
+        this.educationAssessment = educationAssessment;
+        this.explanation = explanation;
+        this.recommendation = recommendation;
     }
 
-    public static ApplicationAssessment create(Application application, BigDecimal matchScore, String employerNotes) {
+    public static ApplicationAssessment create(Application application,
+                                               BigDecimal matchScore,
+                                               BigDecimal semanticScore,
+                                               BigDecimal skillsScore,
+                                               BigDecimal experienceScore,
+                                               BigDecimal educationScore,
+                                               String skillsMatch,
+                                               String skillsGap,
+                                               String experienceAssessment,
+                                               String educationAssessment,
+                                               String explanation,
+                                               RecommendationType recommendation) {
         if (application == null) throw new IllegalArgumentException("Application cannot be null");
-        validateMatchScore(matchScore);
-
+        validateScore(matchScore, "Match score");
+        validateScore(semanticScore, "Semantic score");
+        validateScore(skillsScore, "Skills score");
+        validateScore(experienceScore, "Experience score");
+        validateScore(educationScore, "Education score");
         return ApplicationAssessment.builder()
                 .application(application)
                 .matchScore(matchScore)
-                .employerNotes(employerNotes)
+                .semanticScore(semanticScore)
+                .skillsScore(skillsScore)
+                .experienceScore(experienceScore)
+                .educationScore(educationScore)
+                .skillsMatch(skillsMatch)
+                .skillsGap(skillsGap)
+                .experienceAssessment(experienceAssessment)
+                .educationAssessment(educationAssessment)
+                .explanation(explanation)
+                .recommendation(recommendation)
                 .build();
     }
 
-    public void update(BigDecimal matchScore, String employerNotes) {
-        validateMatchScore(matchScore);
-        this.matchScore = matchScore;
-        this.employerNotes = employerNotes;
+    public void updateEmployerNotes(String notes) {
+        this.employerNotes = notes;
     }
 
-    private static void validateMatchScore(BigDecimal matchScore) {
-        if (matchScore == null) return;
-        if (matchScore.compareTo(BigDecimal.ZERO) < 0 ||
-                matchScore.compareTo(new BigDecimal("100")) > 0)
-            throw new IllegalArgumentException("Match score must be between 0 and 100");
+    public void regenerate(BigDecimal matchScore, BigDecimal semanticScore,
+                           BigDecimal skillsScore, BigDecimal experienceScore,
+                           BigDecimal educationScore, String skillsMatch,
+                           String skillsGap, String experienceAssessment,
+                           String educationAssessment, String explanation,
+                           RecommendationType recommendation) {
+        validateScore(matchScore, "Match score");
+        this.matchScore = matchScore;
+        this.semanticScore = semanticScore;
+        this.skillsScore = skillsScore;
+        this.experienceScore = experienceScore;
+        this.educationScore = educationScore;
+        this.skillsMatch = skillsMatch;
+        this.skillsGap = skillsGap;
+        this.experienceAssessment = experienceAssessment;
+        this.educationAssessment = educationAssessment;
+        this.explanation = explanation;
+        this.recommendation = recommendation;
+    }
+
+    private static void validateScore(BigDecimal score, String name) {
+        if (score == null) return;
+        if (score.compareTo(BigDecimal.ZERO) < 0 ||
+                score.compareTo(new BigDecimal("100")) > 0)
+            throw new IllegalArgumentException(name + " must be between 0 and 100");
     }
 }
