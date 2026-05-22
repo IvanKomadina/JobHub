@@ -9,4 +9,5 @@ import java.util.List;
 @Repository
 public interface ResumeExperienceRepository extends JpaRepository<ResumeExperience, Long> {
     List<ResumeExperience> findByResume_IdOrderBySortOrderAsc(Long resumeId);
+    void deleteByResume_Id(Long resumeId);
 }

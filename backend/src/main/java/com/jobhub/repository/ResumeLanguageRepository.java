@@ -10,4 +10,5 @@ import java.util.List;
 public interface ResumeLanguageRepository extends JpaRepository<ResumeLanguage, Long> {
     List<ResumeLanguage> findByResume_IdOrderBySortOrderAsc(Long resumeId);
     boolean existsByResume_IdAndLanguageName(Long resumeId, String languageName);
+    void deleteByResume_Id(Long resumeId);
 }

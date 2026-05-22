@@ -6,6 +6,7 @@ import com.jobhub.entity.ResumeEducation;
 import com.jobhub.entity.ResumeExperience;
 import com.jobhub.entity.ResumeSkill;
 import com.jobhub.entity.ResumeLanguage;
+import com.jobhub.exception.ResourceNotFoundException;
 import com.jobhub.repository.*;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -34,7 +35,7 @@ public class EmbeddingService {
     @Transactional
     public void generateAndStoreResumeEmbedding(Long resumeId) {
         Resume resume = resumeRepository.findById(resumeId)
-                .orElseThrow(() -> new RuntimeException("Resume not found"));
+                .orElseThrow(() -> new ResourceNotFoundException("Resume not found"));
 
         String resumeText = buildResumeText(resume);
         float[] embedding = generateEmbedding(resumeText);
