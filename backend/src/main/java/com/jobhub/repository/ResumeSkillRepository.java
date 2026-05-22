@@ -10,4 +10,5 @@ import java.util.List;
 public interface ResumeSkillRepository extends JpaRepository<ResumeSkill, Long> {
     List<ResumeSkill> findByResume_IdOrderBySortOrderAsc(Long resumeId);
     boolean existsByResume_IdAndSkillName(Long resumeId, String skillName);
+    void deleteByResume_Id(Long resumeId);
 }

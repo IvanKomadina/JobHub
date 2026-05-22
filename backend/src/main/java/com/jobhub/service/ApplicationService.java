@@ -9,12 +9,14 @@ import com.jobhub.exception.ResourceNotFoundException;
 import com.jobhub.repository.*;
 import com.jobhub.security.AuthenticatedUser;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.util.List;
 
+@Slf4j
 @Service
 @RequiredArgsConstructor
 public class ApplicationService {
@@ -25,7 +27,12 @@ public class ApplicationService {
     private final CandidateRepository candidateRepository;
     private final EmployerRepository employerRepository;
     private final ApplicationDocumentRepository documentRepository;
+    private final ResumeRepository resumeRepository;
     private final StorageService storageService;
+    private final CvParsingService cvParsingService;
+    private final ResumeSkillRepository skillRepository;
+    private final ResumeEducationRepository educationRepository;
+    private final ResumeExperienceRepository experienceRepository;
 
     // CANDIDATE
 
@@ -107,7 +114,7 @@ public class ApplicationService {
                 .toList();
     }
 
-    @Transactional
+    /*@Transactional
     public DocumentResponse uploadDocument(Long applicationId,
                                            MultipartFile file,
                                            DocumentType documentType,
@@ -128,6 +135,50 @@ public class ApplicationService {
         );
 
         documentRepository.save(document);
+        return DocumentResponse.from(document);
+    }*/
+
+    @Transactional
+    public DocumentResponse uploadDocument(Long applicationId,
+                                                      MultipartFile file,
+                                                      DocumentType documentType,
+                                                      AuthenticatedUser currentUser) {
+        Candidate candidate = getCandidateByUserId(currentUser.getUserId());
+        Application application = getApplicationOwnedByCandidate(applicationId, candidate);
+
+        if (application.getStatus() != ApplicationStatus.DRAFT) {
+            throw new IllegalStateException("Documents can only be added to draft applications");
+        }
+
+        String fileUrl = storageService.upload(file, "applications/" + applicationId);
+
+        ApplicationDocument document = ApplicationDocument.create(
+                application,
+                file.getOriginalFilename(),
+                fileUrl,
+                documentType
+        );
+        documentRepository.save(document);
+
+        // Parse CV if it's a resume document
+        if (documentType == DocumentType.RESUME) {
+            try {
+                boolean hasStructuredData = resumeRepository
+                        .existsByCandidate_Id(candidate.getId()) &&
+                        hasAnyResumeContent(candidate.getId());
+
+                if (!hasStructuredData) {
+                    cvParsingService.parseAndStoreResume(file, candidate);
+                    log.info("CV parsed and stored for candidate {}", candidate.getId());
+                } else {
+                    log.info("Candidate {} already has structured resume data, skipping parsing",
+                            candidate.getId());
+                }
+            } catch (Exception e) {
+                log.error("CV parsing failed but document was uploaded: {}", e.getMessage());
+            }
+        }
+
         return DocumentResponse.from(document);
     }
 
@@ -265,5 +316,19 @@ public class ApplicationService {
         if (!application.getCandidate().getId().equals(candidate.getId()))
             throw new AccessDeniedException("You do not have permission to access this application");
         return application;
+    }
+
+    private boolean hasAnyResumeContent(Long candidateId) {
+        return resumeRepository.findByCandidate_Id(candidateId)
+                .map(resume -> {
+                    boolean hasSkills = !skillRepository
+                            .findByResume_IdOrderBySortOrderAsc(resume.getId()).isEmpty();
+                    boolean hasExperience = !experienceRepository
+                            .findByResume_IdOrderBySortOrderAsc(resume.getId()).isEmpty();
+                    boolean hasEducation = !educationRepository
+                            .findByResume_IdOrderBySortOrderAsc(resume.getId()).isEmpty();
+                    return hasSkills || hasExperience || hasEducation;
+                })
+                .orElse(false);
     }
 }

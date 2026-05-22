@@ -30,7 +30,7 @@ public class ScoringService {
 
     public ScoringResult score(Resume resume, JobPost jobPost, double semanticSimilarity) {
         SkillsResult skillsResult = scoreSkills(resume, jobPost);
-        ExperienceResult experienceResult = scoreExperience(resume, jobPost);
+        ExperienceResult experienceResult = scoreExperience(resume);
         EducationResult educationResult = scoreEducation(resume);
 
         double skillsScore = skillsResult.score;
@@ -39,10 +39,10 @@ public class ScoringService {
         double educationScore = educationResult.score;
 
         double totalScore =
-                (skillsScore     * SKILLS_WEIGHT / 100) +
-                        (semanticScore   * SEMANTIC_WEIGHT / 100) +
-                        (experienceScore * EXPERIENCE_WEIGHT / 100) +
-                        (educationScore  * EDUCATION_WEIGHT / 100);
+                (skillsScore * SKILLS_WEIGHT / 100) +
+                (semanticScore * SEMANTIC_WEIGHT / 100) +
+                (experienceScore * EXPERIENCE_WEIGHT / 100) +
+                (educationScore * EDUCATION_WEIGHT / 100);
 
         log.info("Scoring result - skills: {}, semantic: {}, experience: {}, education: {}, total: {}",
                 skillsScore, semanticScore, experienceScore, educationScore, totalScore);
@@ -93,15 +93,14 @@ public class ScoringService {
             else missing.add(required);
         }
 
-        double score = requiredSkills.isEmpty() ? 50.0 :
-                ((double) matched.size() / requiredSkills.size()) * 100;
+        double score = ((double) matched.size() / requiredSkills.size()) * 100;
 
         return new SkillsResult(score, matched, missing, null);
     }
 
     // ==================== EXPERIENCE SCORING ====================
 
-    private ExperienceResult scoreExperience(Resume resume, JobPost jobPost) {
+    private ExperienceResult scoreExperience(Resume resume) {
         List<ResumeExperience> experiences =
                 experienceRepository.findByResume_IdOrderBySortOrderAsc(resume.getId());
 

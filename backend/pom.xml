@@ -45,6 +45,13 @@
 
 	<dependencies>
 
+		<!-- PDFbox -->
+		<dependency>
+			<groupId>org.apache.pdfbox</groupId>
+			<artifactId>pdfbox</artifactId>
+			<version>3.0.3</version>
+		</dependency>
+
 		<!-- Spring AI Ollama -->
 		<dependency>
 			<groupId>org.springframework.ai</groupId>
