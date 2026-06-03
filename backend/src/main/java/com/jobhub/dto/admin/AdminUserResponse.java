@@ -22,6 +22,7 @@ public class AdminUserResponse {
     private String lastName;
 
     // Employer specific
+    private Long employerId;
     private String companyName;
     private String employerStatus;
 
@@ -39,6 +40,7 @@ public class AdminUserResponse {
         }
 
         if (user.getRole() == UserRole.EMPLOYER && user.getEmployer() != null) {
+            builder.employerId(user.getEmployer().getId());
             builder.companyName(user.getEmployer().getCompanyName());
             builder.employerStatus(user.getEmployer().getStatus().name());
         }

@@ -9,10 +9,7 @@ import com.jobhub.enums.EmployerStatus;
 import com.jobhub.enums.PostStatus;
 import com.jobhub.enums.UserRole;
 import com.jobhub.exception.ResourceNotFoundException;
-import com.jobhub.repository.ApplicationRepository;
-import com.jobhub.repository.EmployerRepository;
-import com.jobhub.repository.JobPostRepository;
-import com.jobhub.repository.UserRepository;
+import com.jobhub.repository.*;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -29,6 +26,7 @@ public class AdminService {
     private final EmployerRepository employerRepository;
     private final JobPostRepository jobPostRepository;
     private final ApplicationRepository applicationRepository;
+    private final CandidateRepository candidateRepository;
 
     // USERS
 
@@ -50,6 +48,14 @@ public class AdminService {
                 .orElseThrow(() -> new ResourceNotFoundException("User not found"));
         if (user.getRole() == UserRole.ADMINISTRATOR)
             throw new IllegalStateException("Cannot delete administrator account");
+
+        if (user.getRole() == UserRole.CANDIDATE) {
+            candidateRepository.findByUser_Id(userId)
+                    .ifPresent(candidateRepository::delete);
+        } else if (user.getRole() == UserRole.EMPLOYER) {
+            employerRepository.findByUser_Id(userId)
+                    .ifPresent(employerRepository::delete);
+        }
         userRepository.delete(user);
     }
 
