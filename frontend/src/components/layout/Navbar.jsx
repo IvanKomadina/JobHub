@@ -79,7 +79,7 @@ export default function Navbar() {
                         ) : (
                             <>
                                 <Link to="/login">
-                                    <Button variant="secondary" size="sm">
+                                    <Button variant="primary" size="sm">
                                         Log in
                                     </Button>
                                 </Link>
