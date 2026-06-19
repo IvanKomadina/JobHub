@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { FileText, Heart, Briefcase, Eye, X, Upload } from 'lucide-react';
+import { FileText, Heart, Briefcase, Eye, X, Upload, User, Trash2, Search } from 'lucide-react';
 import { Link, useSearchParams, useNavigate } from 'react-router-dom';
 import DashboardLayout from '../../components/layout/DashboardLayout';
 import Card from '../../components/ui/Card';
@@ -14,10 +14,12 @@ import { formatDate, formatApplicationStatus } from '../../utils/formatters';
 import toast from 'react-hot-toast';
 
 const navItems = [
+    { to: '/jobs', icon: <Search size={18} />, label: 'Browse Jobs' },
     { to: '/candidate/dashboard', icon: <Briefcase size={18} />, label: 'Dashboard' },
     { to: '/candidate/applications', icon: <FileText size={18} />, label: 'My Applications' },
     { to: '/candidate/resume', icon: <FileText size={18} />, label: 'My Resume' },
     { to: '/candidate/favorites', icon: <Heart size={18} />, label: 'Saved Jobs' },
+    { to: '/candidate/profile', icon: <User size={18} />, label: 'My Profile' },
 ];
 
 const statusVariant = {
@@ -54,6 +56,17 @@ export default function CandidateApplicationsPage() {
         },
         onError: (error) => {
             toast.error(error.response?.data?.message || 'Failed to withdraw');
+        },
+    });
+
+    const deleteDraftMutation = useMutation({
+        mutationFn: applicationApi.deleteDraft,
+        onSuccess: () => {
+            queryClient.invalidateQueries(['my-applications']);
+            toast.success('Draft deleted');
+        },
+        onError: (error) => {
+            toast.error(error.response?.data?.message || 'Failed to delete draft');
         },
     });
 
@@ -156,6 +169,15 @@ export default function CandidateApplicationsPage() {
                                             isLoading={withdrawMutation.isPending}
                                         >
                                             Withdraw
+                                        </Button>
+                                    )}
+                                    {app.status === 'DRAFT' && (
+                                        <Button
+                                            variant="ghost"
+                                            size="sm"
+                                            onClick={() => {deleteDraftMutation.mutate(app.id)}}
+                                        >
+                                            <Trash2 size={14} className="text-red-400" />
                                         </Button>
                                     )}
                                 </div>

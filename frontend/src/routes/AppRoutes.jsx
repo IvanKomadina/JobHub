@@ -17,11 +17,13 @@ import CandidateApplicationsPage from '../pages/candidate/CandidateApplicationsP
 import CandidateResumePage from '../pages/candidate/CandidateResumePage';
 import CandidateFavoritesPage from '../pages/candidate/CandidateFavoritesPage';
 import ApplyPage from '../pages/candidate/ApplyPage';
+import CandidateProfilePage from '../pages/candidate/CandidateProfilePage';
 
 // Employer pages
 import EmployerDashboard from '../pages/employer/EmployerDashboard';
 import EmployerPostsPage from '../pages/employer/EmployerPostsPage';
 import EmployerApplicationsPage from '../pages/employer/EmployerApplicationsPage';
+import EmployerProfilePage from '../pages/employer/EmployerProfilePage';
 
 // Admin pages
 import AdminDashboard from '../pages/admin/AdminDashboard';
@@ -46,6 +48,7 @@ export default function AppRoutes() {
                     <Route path="/candidate/resume" element={<CandidateResumePage />} />
                     <Route path="/candidate/favorites" element={<CandidateFavoritesPage />} />
                     <Route path="/candidate/applications/new" element={<ApplyPage />} />
+                    <Route path="/candidate/profile" element={<CandidateProfilePage />} />
                 </Route>
             </Route>
 
@@ -55,6 +58,7 @@ export default function AppRoutes() {
                     <Route path="/employer/dashboard" element={<EmployerDashboard />} />
                     <Route path="/employer/posts" element={<EmployerPostsPage />} />
                     <Route path="/employer/posts/:postId/applications" element={<EmployerApplicationsPage />} />
+                    <Route path="/employer/profile" element={<EmployerProfilePage />} />
                 </Route>
             </Route>
 

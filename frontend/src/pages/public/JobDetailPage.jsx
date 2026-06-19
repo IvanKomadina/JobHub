@@ -1,5 +1,5 @@
 import { useParams, useNavigate } from 'react-router-dom';
-import { useQuery } from '@tanstack/react-query';
+import { useQuery, useQueryClient } from '@tanstack/react-query';
 import {
     MapPin, Clock, DollarSign, Building2,
     Briefcase, ArrowLeft, Heart, Share2
@@ -20,6 +20,7 @@ export default function JobDetailPage() {
     const navigate = useNavigate();
     const { user, isAuthenticated } = useAuthStore();
     const [isFavoriting, setIsFavoriting] = useState(false);
+    const queryClient = useQueryClient();
 
     const { data, isLoading } = useQuery({
         queryKey: ['job', id],
@@ -28,7 +29,7 @@ export default function JobDetailPage() {
 
     const { data: favoriteData, refetch: refetchFavorite } = useQuery({
         queryKey: ['favorite-check', id],
-        queryFn: () => favoriteApi.check(id),
+        queryFn: () => favoriteApi.checkIsFavorite(id),
         enabled: isAuthenticated && user?.role === 'CANDIDATE',
     });
 
@@ -58,13 +59,18 @@ export default function JobDetailPage() {
         setIsFavoriting(true);
         try {
             if (isFavorite) {
-                await favoriteApi.remove(favoriteData?.data?.id);
+                await favoriteApi.remove(id);
                 toast.success('Removed from favorites');
             } else {
                 await favoriteApi.add(id);
                 toast.success('Saved to favorites');
             }
-            refetchFavorite();
+
+            await queryClient.invalidateQueries({
+                queryKey: ['my-favorites']
+            });
+
+            await refetchFavorite();
         } catch (error) {
             toast.error('Something went wrong');
         } finally {
@@ -225,9 +231,11 @@ export default function JobDetailPage() {
                                     </div>
                                 )}
                                 {post.categoryName && (
-                                    <div className="flex justify-between text-sm">
-                                        <span className="text-gray-500">Category</span>
-                                        <span className="font-medium text-gray-900">
+                                    <div className="flex gap-2 text-sm">
+                                        <span className="text-gray-500 min-w-[90px]">
+                                            Category
+                                        </span>
+                                        <span className="font-medium text-gray-900 text-right flex-1">
                                             {post.categoryName}
                                         </span>
                                     </div>

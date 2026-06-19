@@ -4,10 +4,12 @@ import useAuthStore from '../../store/authStore';
 import { authApi } from '../../api/authApi';
 import toast from 'react-hot-toast';
 import Button from '../ui/Button';
+import { useQueryClient } from '@tanstack/react-query';
 
 export default function Navbar() {
     const { user, isAuthenticated, clearUser } = useAuthStore();
     const navigate = useNavigate();
+    const queryClient = useQueryClient();
 
     const handleLogout = async () => {
         try {
@@ -15,6 +17,7 @@ export default function Navbar() {
         } catch (e) {
             // ignore
         } finally {
+            queryClient.clear();
             clearUser();
             navigate('/');
             toast.success('Logged out successfully');

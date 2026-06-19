@@ -132,17 +132,6 @@ export default function JobListPage() {
                             }))}
                         />
                         <Select
-                            placeholder="Sort by"
-                            options={[
-                                { value: 'publishedAt', label: 'Date Posted' },
-                                { value: 'title', label: 'Job Title' },
-                            ]}
-                            value={filters.sortBy}
-                            onChange={(e) => setFilters(f => ({
-                                ...f, sortBy: e.target.value
-                            }))}
-                        />
-                        <Select
                             placeholder="Order"
                             options={[
                                 { value: 'desc', label: 'Newest First' },

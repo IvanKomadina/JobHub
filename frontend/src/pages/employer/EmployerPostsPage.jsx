@@ -2,7 +2,7 @@ import { useState } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import {
     Briefcase, FileText, Plus, Edit2,
-    Trash2, X, Users, Eye
+    Trash2, X, Users, Eye, User
 } from 'lucide-react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useForm } from 'react-hook-form';
@@ -19,13 +19,16 @@ import Select from '../../components/ui/Select';
 import Spinner from '../../components/ui/Spinner';
 import EmptyState from '../../components/ui/EmptyState';
 import { jobPostApi } from '../../api/jobPostApi';
+import useAuthStore from '../../store/authStore';
 import { formatDate, formatEmploymentType } from '../../utils/formatters';
 import toast from 'react-hot-toast';
 import api from '../../api/axios';
+import { employerApi } from '../../api/employerApi';
 
 const navItems = [
     { to: '/employer/dashboard', icon: <Briefcase size={18} />, label: 'Dashboard' },
     { to: '/employer/posts', icon: <FileText size={18} />, label: 'My Posts' },
+    { to: '/employer/profile', icon: <User size={18} />, label: 'Company Profile' },
 ];
 
 const EMPLOYMENT_TYPES = [
@@ -57,6 +60,7 @@ const statusVariant = {
 export default function EmployerPostsPage() {
     const queryClient = useQueryClient();
     const [postModal, setPostModal] = useState({ open: false, data: null });
+    const { user } = useAuthStore();
 
     const { data, isLoading } = useQuery({
         queryKey: ['my-posts'],
@@ -71,6 +75,11 @@ export default function EmployerPostsPage() {
     const { data: locationsData } = useQuery({
         queryKey: ['locations'],
         queryFn: () => api.get('/api/locations'),
+    });
+
+    const { data: profileData } = useQuery({
+        queryKey: ['employer-profile'],
+        queryFn: () => employerApi.getProfile(),
     });
 
     const deleteMutation = useMutation({
@@ -98,6 +107,7 @@ export default function EmployerPostsPage() {
     const locations = locationsData?.data?.map(l => ({
         value: String(l.id), label: `${l.city}, ${l.country}`
     })) || [];
+    const canCreatePost = profileData?.data?.status === 'APPROVED';
 
     return (
         <DashboardLayout navItems={navItems}>
@@ -108,7 +118,10 @@ export default function EmployerPostsPage() {
                         Manage your job listings.
                     </p>
                 </div>
-                <Button onClick={() => setPostModal({ open: true, data: null })}>
+                <Button 
+                    onClick={() => setPostModal({ open: true, data: null })}
+                    disabled={!canCreatePost}    
+                >
                     <Plus size={16} className="mr-2" />
                     New Post
                 </Button>
@@ -119,17 +132,27 @@ export default function EmployerPostsPage() {
                     <Spinner />
                 </div>
             ) : posts.length === 0 ? (
-                <EmptyState
-                    icon={<Briefcase size={48} />}
-                    title="No job posts yet"
-                    description="Create your first job post to start receiving applications."
-                    action={
-                        <Button onClick={() => setPostModal({ open: true, data: null })}>
-                            <Plus size={16} className="mr-2" />
-                            Create Post
-                        </Button>
-                    }
-                />
+                <>
+                    <EmptyState
+                        icon={<Briefcase size={48} />}
+                        title="No job posts yet"
+                        description="Create your first job post to start receiving applications."
+                        action={
+                            <Button 
+                                onClick={() => setPostModal({ open: true, data: null })}
+                                disabled={!canCreatePost}
+                            >
+                                <Plus size={16} className="mr-2" />
+                                Create Post
+                            </Button>
+                        }
+                    />
+                    {!canCreatePost && (
+                        <p className="text-sm text-red-500 mt-2 text-center">
+                            Your company must be approved before creating job posts.
+                        </p>
+                    )}
+                </>
             ) : (
                 <div className="space-y-3">
                     {posts.map((post) => (
@@ -152,13 +175,6 @@ export default function EmployerPostsPage() {
                                 </div>
 
                                 <div className="flex items-center gap-2">
-                                    <Link to={`/employer/posts/${post.id}/applications`}>
-                                        <Button variant="secondary" size="sm">
-                                            <Users size={14} className="mr-1" />
-                                            Applications
-                                        </Button>
-                                    </Link>
-
                                     {post.status === 'ACTIVE' && (
                                         <>
                                             <Button
@@ -180,13 +196,22 @@ export default function EmployerPostsPage() {
                                         </>
                                     )}
 
-                                    <Button
-                                        variant="ghost"
-                                        size="sm"
-                                        onClick={() => deleteMutation.mutate(post.id)}
-                                    >
-                                        <Trash2 size={14} className="text-red-400" />
-                                    </Button>
+                                    {post.status !== 'DELETED' && (
+                                        <Button
+                                            variant="ghost"
+                                            size="sm"
+                                            onClick={() => deleteMutation.mutate(post.id)}
+                                        >
+                                            <Trash2 size={14} className="text-red-400" />
+                                        </Button>
+                                    )}
+
+                                    <Link to={`/employer/posts/${post.id}/applications`}>
+                                        <Button variant="secondary" size="sm">
+                                            <Users size={14} className="mr-1" />
+                                            Applications
+                                        </Button>
+                                    </Link>
                                 </div>
                             </div>
                         </Card>
@@ -211,14 +236,27 @@ export default function EmployerPostsPage() {
 function JobPostModal({ isOpen, data, categories, locations, onClose, onSave }) {
     const { register, handleSubmit, reset, formState: { errors } } = useForm({
         resolver: zodResolver(postSchema),
-        defaultValues: data ? {
-            ...data,
+        values: data ? {
+            title: data.title || '',
+            description: data.description || '',
+            requirements: data.requirements || '',
+            employmentType: data.employmentType || '',
             categoryId: data.categoryId ? String(data.categoryId) : '',
             locationId: data.locationId ? String(data.locationId) : '',
             salaryMin: data.salaryMin ? String(data.salaryMin) : '',
             salaryMax: data.salaryMax ? String(data.salaryMax) : '',
             closesAt: data.closesAt ? data.closesAt.split('T')[0] : '',
-        } : {},
+        } : {
+            title: '',
+            description: '',
+            requirements: '',
+            employmentType: '',
+            categoryId: '',
+            locationId: '',
+            salaryMin: '',
+            salaryMax: '',
+            closesAt: '',
+        },
     });
 
     const onSubmit = async (formData) => {

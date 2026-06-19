@@ -16,6 +16,7 @@ import Pagination from '../../components/ui/Pagination';
 import { adminApi } from '../../api/adminApi';
 import { formatDate } from '../../utils/formatters';
 import toast from 'react-hot-toast';
+import Modal from '../../components/ui/Modal';
 
 const navItems = [
     { to: '/admin/dashboard', icon: <Briefcase size={18} />, label: 'Dashboard' },
@@ -47,6 +48,7 @@ export default function AdminUsersPage() {
     const [page, setPage] = useState(0);
     const [role, setRole] = useState('');
     const [activeTab, setActiveTab] = useState('all'); // all | pending
+    const [deleteUserId, setDeleteUserId] = useState(null);
 
     const { data, isLoading } = useQuery({
         queryKey: ['admin-users', role, page],
@@ -279,11 +281,7 @@ export default function AdminUsersPage() {
                                                     <Button
                                                         variant="ghost"
                                                         size="sm"
-                                                        onClick={() => {
-                                                            if (confirm('Are you sure you want to delete this user?')) {
-                                                                deleteMutation.mutate(user.id);
-                                                            }
-                                                        }}
+                                                        onClick={() => {setDeleteUserId(user.id)}}
                                                     >
                                                         <Trash2 size={14} className="text-red-400" />
                                                     </Button>
@@ -303,6 +301,38 @@ export default function AdminUsersPage() {
                 totalPages={displayTotalPages}
                 onPageChange={setPage}
             />
+
+            <Modal
+                isOpen={!!deleteUserId}
+                onClose={() => setDeleteUserId(null)}
+                title="Delete User"
+                size="sm"
+            >
+                <p className="text-sm text-gray-600">
+                    Are you sure you want to delete this user? This action cannot be undone.
+                </p>
+
+                <div className="flex gap-3 mt-6">
+                    <Button
+                        variant="secondary"
+                        className="flex-1"
+                        onClick={() => setDeleteUserId(null)}
+                    >
+                        Cancel
+                    </Button>
+
+                    <Button
+                        variant="danger"
+                        className="flex-1"
+                        onClick={() => {
+                            deleteMutation.mutate(deleteUserId);
+                            setDeleteUserId(null);
+                        }}
+                    >
+                        Delete
+                    </Button>
+                </div>
+            </Modal>
         </DashboardLayout>
     );
 }

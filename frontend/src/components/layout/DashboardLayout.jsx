@@ -1,12 +1,14 @@
-import { NavLink, useNavigate } from 'react-router-dom';
+import { Link, NavLink, useNavigate } from 'react-router-dom';
 import { LogOut, Briefcase } from 'lucide-react';
 import useAuthStore from '../../store/authStore';
 import { authApi } from '../../api/authApi';
 import toast from 'react-hot-toast';
+import { useQueryClient } from '@tanstack/react-query';
 
 export default function DashboardLayout({ children, navItems }) {
     const { user, clearUser } = useAuthStore();
     const navigate = useNavigate();
+    const queryClient = useQueryClient();
 
     const handleLogout = async () => {
         try {
@@ -14,6 +16,7 @@ export default function DashboardLayout({ children, navItems }) {
         } catch (e) {
             // ignore
         } finally {
+            queryClient.clear();
             clearUser();
             navigate('/');
             toast.success('Logged out successfully');

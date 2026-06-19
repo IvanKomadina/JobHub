@@ -1,9 +1,9 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import {
     Briefcase, FileText, ArrowLeft,
-    Download, ChevronDown, Brain
+    Download, ChevronDown, Brain, User
 } from 'lucide-react';
 import DashboardLayout from '../../components/layout/DashboardLayout';
 import Card from '../../components/ui/Card';
@@ -20,6 +20,7 @@ import toast from 'react-hot-toast';
 const navItems = [
     { to: '/employer/dashboard', icon: <Briefcase size={18} />, label: 'Dashboard' },
     { to: '/employer/posts', icon: <FileText size={18} />, label: 'My Posts' },
+    { to: '/employer/profile', icon: <User size={18} />, label: 'Company Profile' },
 ];
 
 const statusVariant = {
@@ -55,15 +56,21 @@ export default function EmployerApplicationsPage() {
 
     const { data: docsData } = useQuery({
         queryKey: ['employer-docs', selectedApp?.id],
-        queryFn: () => applicationApi.getEmployerDocuments(selectedApp.id),
+        queryFn: () => applicationApi.getDocumentsEmployer(selectedApp.id),
         enabled: !!selectedApp,
     });
+
 
     const { data: assessmentData, refetch: refetchAssessment } = useQuery({
         queryKey: ['assessment', selectedApp?.id],
         queryFn: () => applicationApi.getAssessment(selectedApp.id),
-        enabled: !!selectedApp,
+        enabled: !!selectedApp?.id,
         retry: false,
+        // Poll every 5 seconds while assessment is generating or pending
+        refetchInterval: (query) => {
+            const status = query.state.data?.data?.assessmentStatus;
+            return status === 'PENDING' || status === 'GENERATING' ? 2000 : false;
+        }
     });
 
     const statusMutation = useMutation({
@@ -80,6 +87,9 @@ export default function EmployerApplicationsPage() {
         try {
             await applicationApi.generateAssessment(applicationId);
             refetchAssessment();
+                queryClient.invalidateQueries({
+                queryKey: ['assessment', applicationId],
+            });
             toast.success('Assessment generated!');
         } catch (e) {
             toast.error('Failed to generate assessment');
@@ -260,105 +270,102 @@ export default function EmployerApplicationsPage() {
                                 <p className="text-sm font-medium text-gray-700">
                                     AI Assessment
                                 </p>
-                                <Button
-                                    size="sm"
-                                    variant="secondary"
-                                    onClick={() => handleGenerateAssessment(selectedApp.id)}
-                                    isLoading={assessingId === selectedApp.id}
-                                >
-                                    <Brain size={14} className="mr-1" />
-                                    {assessment ? 'Regenerate' : 'Generate Assessment'}
-                                </Button>
+                                {assessment?.assessmentStatus === 'COMPLETED' && (
+                                    <Button
+                                        size="sm"
+                                        variant="secondary"
+                                        onClick={() => handleGenerateAssessment(selectedApp.id)}
+                                        isLoading={assessingId === selectedApp.id}
+                                    >
+                                        <Brain size={14} className="mr-1" />
+                                        Regenerate
+                                    </Button>
+                                )}
                             </div>
 
-                            {assessment ? (
-                                <div className="bg-gray-50 rounded-lg p-4 space-y-3">
-                                    <div className="flex items-center justify-between">
-                                        <div className="flex items-center gap-3">
-                                            <div className="text-2xl font-bold text-primary-600">
-                                                {assessment.matchScore}%
-                                            </div>
-                                            <Badge variant={recommendationVariant[assessment.recommendation]}>
-                                                {formatRecommendation(assessment.recommendation)}
-                                            </Badge>
-                                        </div>
-                                    </div>
-
-                                    {/* Score breakdown */}
-                                    <div className="grid grid-cols-2 gap-2 text-xs">
-                                        <div className="flex justify-between bg-white rounded p-2">
-                                            <span className="text-gray-500">Skills</span>
-                                            <span className="font-medium">{assessment.skillsScore}%</span>
-                                        </div>
-                                        <div className="flex justify-between bg-white rounded p-2">
-                                            <span className="text-gray-500">Semantic</span>
-                                            <span className="font-medium">{assessment.semanticScore}%</span>
-                                        </div>
-                                        <div className="flex justify-between bg-white rounded p-2">
-                                            <span className="text-gray-500">Experience</span>
-                                            <span className="font-medium">{assessment.experienceScore}%</span>
-                                        </div>
-                                        <div className="flex justify-between bg-white rounded p-2">
-                                            <span className="text-gray-500">Education</span>
-                                            <span className="font-medium">{assessment.educationScore}%</span>
-                                        </div>
-                                    </div>
-
-                                    {/* Matched skills */}
-                                    {assessment.matchedSkills?.length > 0 && (
-                                        <div>
-                                            <p className="text-xs font-medium text-gray-600 mb-1">
-                                                Matched Skills
-                                            </p>
-                                            <div className="flex flex-wrap gap-1">
-                                                {assessment.matchedSkills.map((s, i) => (
-                                                    <span
-                                                        key={i}
-                                                        className="text-xs bg-green-100 text-green-700 px-2 py-0.5 rounded-full"
-                                                    >
-                                                        {s}
-                                                    </span>
-                                                ))}
-                                            </div>
-                                        </div>
-                                    )}
-
-                                    {/* Missing skills */}
-                                    {assessment.missingSkills?.length > 0 && (
-                                        <div>
-                                            <p className="text-xs font-medium text-gray-600 mb-1">
-                                                Missing Skills
-                                            </p>
-                                            <div className="flex flex-wrap gap-1">
-                                                {assessment.missingSkills.map((s, i) => (
-                                                    <span
-                                                        key={i}
-                                                        className="text-xs bg-red-100 text-red-700 px-2 py-0.5 rounded-full"
-                                                    >
-                                                        {s}
-                                                    </span>
-                                                ))}
-                                            </div>
-                                        </div>
-                                    )}
-
-                                    {/* Explanation */}
-                                    {assessment.explanation && (
-                                        <div>
-                                            <p className="text-xs font-medium text-gray-600 mb-1">
-                                                AI Analysis
-                                            </p>
-                                            <p className="text-xs text-gray-600 leading-relaxed">
-                                                {assessment.explanation}
-                                            </p>
-                                        </div>
-                                    )}
-                                </div>
-                            ) : (
+                            {!assessment && (
                                 <p className="text-sm text-gray-400 italic">
-                                    No assessment yet. Click "Generate Assessment" to analyze this candidate.
+                                    No assessment available.
                                 </p>
                             )}
+
+                            {assessment?.assessmentStatus === 'PENDING' && (
+                                <div className="flex items-center gap-2 text-sm text-amber-600 bg-amber-50 rounded-lg p-3">
+                                    <Spinner size="sm" />
+                                    Assessment is queued and will generate shortly...
+                                </div>
+                            )}
+
+                            {assessment?.assessmentStatus === 'GENERATING' && (
+                                <div className="flex items-center gap-2 text-sm text-blue-600 bg-blue-50 rounded-lg p-3">
+                                    <Spinner size="sm" />
+                                    AI is analyzing the candidate... This may take a minute.
+                                </div>
+                            )}
+
+                            {assessment?.assessmentStatus === 'FAILED' && (
+                                <div className="space-y-2">
+                                    <div className="flex items-center gap-2 text-sm text-red-600 bg-red-50 rounded-lg p-3">
+                                        Assessment generation failed.
+                                    </div>
+                                    <Button
+                                        size="sm"
+                                        variant="secondary"
+                                        onClick={() => handleGenerateAssessment(selectedApp.id)}
+                                        isLoading={assessingId === selectedApp.id}
+                                    >
+                                        <Brain size={14} className="mr-1" />
+                                        Retry Assessment
+                                    </Button>
+                                </div>
+                                )}
+
+                                {assessment?.assessmentStatus === 'COMPLETED' && (
+                                    <div className="bg-gray-50 rounded-lg p-4 space-y-3">
+                                        <div className="flex items-center justify-between">
+                                            <div className="flex items-center gap-3">
+                                                <div className="text-2xl font-bold text-primary-600">
+                                                    {assessment.matchScore}%
+                                                </div>
+                                                <Badge variant={recommendationVariant[assessment.recommendation]}>
+                                                    {formatRecommendation(assessment.recommendation)}
+                                                </Badge>
+                                            </div>
+                                        </div>
+
+                                        {/* Score breakdown */}
+                                        <div className="grid grid-cols-2 gap-2 text-xs">
+                                            <div className="flex justify-between bg-white rounded p-2">
+                                                <span className="text-gray-500">Skills</span>
+                                                <span className="font-medium">{assessment.skillsScore}%</span>
+                                            </div>
+                                            <div className="flex justify-between bg-white rounded p-2">
+                                                <span className="text-gray-500">Semantic</span>
+                                                <span className="font-medium">{assessment.semanticScore}%</span>
+                                            </div>
+                                            <div className="flex justify-between bg-white rounded p-2">
+                                                <span className="text-gray-500">Experience</span>
+                                                <span className="font-medium">{assessment.experienceScore}%</span>
+                                            </div>
+                                            <div className="flex justify-between bg-white rounded p-2">
+                                                <span className="text-gray-500">Education</span>
+                                                <span className="font-medium">{assessment.educationScore}%</span>
+                                            </div>
+                                        </div>
+
+                                        {/* Explanation */}
+                                        {assessment.explanation && (
+                                            <div>
+                                                <p className="text-xs font-medium text-gray-600 mb-1">
+                                                    AI Analysis
+                                                </p>
+                                                <p className="text-xs text-gray-600 leading-relaxed">
+                                                    {assessment.explanation}
+                                                </p>
+                                            </div>
+                                        )}
+                                    </div>
+                                )}
                         </div>
 
                         {/* Actions */}

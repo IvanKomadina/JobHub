@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { useNavigate, useSearchParams, Link } from 'react-router-dom';
-import { useQuery, useMutation } from '@tanstack/react-query';
-import { ArrowLeft, Upload, X, FileText, Briefcase, Heart } from 'lucide-react';
+import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
+import { ArrowLeft, Upload, X, FileText, Briefcase, Heart, User, Search } from 'lucide-react';
 import DashboardLayout from '../../components/layout/DashboardLayout';
 import Card from '../../components/ui/Card';
 import Button from '../../components/ui/Button';
@@ -13,16 +13,19 @@ import { formatEmploymentType } from '../../utils/formatters';
 import toast from 'react-hot-toast';
 
 const navItems = [
+    { to: '/jobs', icon: <Search size={18} />, label: 'Browse Jobs' },
     { to: '/candidate/dashboard', icon: <Briefcase size={18} />, label: 'Dashboard' },
     { to: '/candidate/applications', icon: <FileText size={18} />, label: 'My Applications' },
     { to: '/candidate/resume', icon: <FileText size={18} />, label: 'My Resume' },
     { to: '/candidate/favorites', icon: <Heart size={18} />, label: 'Saved Jobs' },
+    { to: '/candidate/profile', icon: <User size={18} />, label: 'My Profile' },
 ];
 
 export default function ApplyPage() {
     const navigate = useNavigate();
     const [searchParams] = useSearchParams();
     const jobPostId = searchParams.get('jobPostId');
+    const queryClient = useQueryClient();
 
     const [step, setStep] = useState(1); // 1: cover letter, 2: documents, 3: review
     const [applicationId, setApplicationId] = useState(null);
@@ -41,6 +44,7 @@ export default function ApplyPage() {
     const createDraftMutation = useMutation({
         mutationFn: () => applicationApi.createDraft(jobPostId, { coverLetter }),
         onSuccess: (data) => {
+            queryClient.invalidateQueries(['my-applications']);
             setApplicationId(data.data.id);
             setStep(2);
             toast.success('Application draft created');

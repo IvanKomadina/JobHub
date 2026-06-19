@@ -1,5 +1,5 @@
 import { useQuery } from '@tanstack/react-query';
-import { Briefcase, FileText, Users, Plus, ArrowRight } from 'lucide-react';
+import { Briefcase, FileText, Users, Plus, ArrowRight, User } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import DashboardLayout from '../../components/layout/DashboardLayout';
 import Card from '../../components/ui/Card';
@@ -7,12 +7,14 @@ import Badge from '../../components/ui/Badge';
 import Button from '../../components/ui/Button';
 import Spinner from '../../components/ui/Spinner';
 import { jobPostApi } from '../../api/jobPostApi';
+import { employerApi } from '../../api/employerApi';
 import { formatDate } from '../../utils/formatters';
 import useAuthStore from '../../store/authStore';
 
 const navItems = [
     { to: '/employer/dashboard', icon: <Briefcase size={18} />, label: 'Dashboard' },
     { to: '/employer/posts', icon: <FileText size={18} />, label: 'My Posts' },
+    { to: '/employer/profile', icon: <User size={18} />, label: 'Company Profile' },
 ];
 
 const statusVariant = {
@@ -29,7 +31,13 @@ export default function EmployerDashboard() {
         queryFn: jobPostApi.getMyPosts,
     });
 
+    const { data: profileData } = useQuery({
+        queryKey: ['employer-profile'],
+        queryFn: employerApi.getProfile,
+    });
+
     const posts = data?.data || [];
+    const profile = profileData?.data;
     const activePosts = posts.filter(p => p.status === 'ACTIVE');
     const recentPosts = posts.slice(0, 5);
 
@@ -79,11 +87,19 @@ export default function EmployerDashboard() {
                         <div>
                             <p className="text-sm text-gray-500">Account Status</p>
                             <p className="text-sm font-semibold text-gray-900 mt-1">
-                                {user?.employerStatus || 'Pending Approval'}
+                                {profile?.status || 'Loading...'}
                             </p>
                         </div>
-                        <div className="bg-amber-100 p-3 rounded-lg">
-                            <Users className="text-amber-600" size={22} />
+                        <div className={`p-3 rounded-lg ${
+                            profile?.status === 'APPROVED' ? 'bg-green-100' :
+                            profile?.status === 'REJECTED' ? 'bg-red-100' :
+                            'bg-amber-100'
+                        }`}>
+                            <Users className={`${
+                                profile?.status === 'APPROVED' ? 'text-green-600' :
+                                profile?.status === 'REJECTED' ? 'text-red-600' :
+                                'text-amber-600'
+                            }`} size={22} />
                         </div>
                     </div>
                 </Card>
