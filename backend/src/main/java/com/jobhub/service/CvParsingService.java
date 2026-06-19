@@ -15,6 +15,7 @@ import org.springframework.ai.chat.model.ChatModel;
 import org.springframework.ai.chat.messages.SystemMessage;
 import org.springframework.ai.chat.messages.UserMessage;
 import org.springframework.ai.chat.prompt.Prompt;
+import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
@@ -39,6 +40,8 @@ public class CvParsingService {
     private final ResumeLanguageRepository languageRepository;
     private final CandidateRepository candidateRepository;
     private final ObjectMapper objectMapper;
+    private final ApplicationAssessmentRepository assessmentRepository;
+    private final AssessmentAgentService assessmentAgentService;
 
     private static final String SYSTEM_PROMPT = """
             You are a CV parser. Extract structured information from CV text.
@@ -89,6 +92,7 @@ public class CvParsingService {
             %s
             """;
 
+    /*@Async("taskExecutor")
     @Transactional
     public void parseAndStoreResume(MultipartFile file, Candidate candidate) {
         log.info("Starting CV parsing for candidate {}", candidate.getId());
@@ -118,11 +122,53 @@ public class CvParsingService {
         storeParsedData(resume, jsonResponse);
 
         log.info("CV parsing completed for candidate {}", candidate.getId());
+    }*/
+
+    @Async("taskExecutor")
+    @Transactional
+    public void parseAndStoreResumeAsync(byte[] fileBytes, String filename,
+                                         String contentType, Candidate candidate,
+                                         Long applicationId) {
+        log.info("Starting async CV parsing for candidate {}", candidate.getId());
+
+        try {
+            // 1. Extract text from PDF
+            String cvText = extractTextFromPdfBytes(fileBytes);
+            if (cvText == null || cvText.isBlank()) {
+                log.warn("Could not extract text from CV for candidate {}", candidate.getId());
+                return;
+            }
+
+            // 2. Parse with LLM
+            String jsonResponse = callLlmForParsing(cvText);
+            if (jsonResponse == null) {
+                log.warn("LLM parsing failed for candidate {}", candidate.getId());
+                return;
+            }
+
+            // 3. Get or create resume
+            Resume resume = resumeRepository.findByCandidate_Id(candidate.getId())
+                    .orElseGet(() -> resumeRepository.save(Resume.create(candidate, null)));
+
+            // 4. Clear existing data
+            clearExistingResumeData(resume.getId());
+            storeParsedData(resume, jsonResponse);
+
+            // 5. Store parsed data
+            log.info("Async CV parsing completed for candidate {}", candidate.getId());
+
+            // Trigger assessment since resume is ready
+            assessmentAgentService.generateAssessmentAsync(applicationId);
+
+        } catch (Exception e) {
+            log.error("CV parsing failed for candidate {}: {}", candidate.getId(), e.getMessage());
+            markAssessmentFailed(applicationId);
+        }
     }
 
     // ==================== PRIVATE HELPERS ====================
 
-    private String extractTextFromPdf(MultipartFile file) {
+    /*private String extractTextFromPdf(MultipartFile file) {
         try {
             PDDocument document = Loader.loadPDF(file.getBytes());
             PDFTextStripper stripper = new PDFTextStripper();
@@ -132,6 +178,19 @@ public class CvParsingService {
             return text;
         } catch (IOException e) {
             log.error("Failed to extract text from PDF: {}", e.getMessage());
+            return null;
+        }
+    }*/
+
+    private String extractTextFromPdfBytes(byte[] fileBytes) {
+        try {
+            PDDocument document = Loader.loadPDF(fileBytes);
+            PDFTextStripper stripper = new PDFTextStripper();
+            String text = stripper.getText(document);
+            document.close();
+            return text;
+        } catch (IOException e) {
+            log.error("Failed to extract text from PDF bytes: {}", e.getMessage());
             return null;
         }
     }
@@ -319,5 +378,13 @@ public class CvParsingService {
         } catch (IllegalArgumentException e) {
             return null;
         }
+    }
+
+    private void markAssessmentFailed(Long applicationId) {
+        assessmentRepository.findByApplication_Id(applicationId)
+                .ifPresent(assessment -> {
+                    assessment.markFailed();
+                    assessmentRepository.save(assessment);
+                });
     }
 }

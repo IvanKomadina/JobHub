@@ -10,6 +10,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.ai.chat.model.ChatModel;
 import org.springframework.ai.chat.prompt.Prompt;
 import org.springframework.ai.chat.prompt.PromptTemplate;
+import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -28,6 +29,31 @@ public class AssessmentAgentService {
     private final EmbeddingService embeddingService;
     private final ScoringService scoringService;
     private final ChatModel chatModel;
+
+    @Async("taskExecutor")
+    @Transactional
+    public void generateAssessmentAsync(Long applicationId) {
+        // Find the pending assessment record
+        ApplicationAssessment assessment = assessmentRepository
+                .findByApplication_Id(applicationId)
+                .orElse(null);
+
+        if (assessment != null) {
+            assessment.markGenerating();
+            assessmentRepository.save(assessment);
+        }
+
+        try {
+            generateAssessment(applicationId);
+        } catch (Exception e) {
+            log.error("Async assessment generation failed for application {}: {}",
+                    applicationId, e.getMessage());
+            if (assessment != null) {
+                assessment.markFailed();
+                assessmentRepository.save(assessment);
+            }
+        }
+    }
 
     @Transactional
     public AssessmentResponse generateAssessment(Long applicationId) {
@@ -101,6 +127,7 @@ public class AssessmentAgentService {
                         recommendation
                 ));
 
+        assessment.markCompleted();
         assessmentRepository.save(assessment);
         log.info("Assessment saved for application {} with score {}",
                 applicationId, scoringResult.totalScore());

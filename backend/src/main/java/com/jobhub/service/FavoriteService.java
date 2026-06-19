@@ -44,10 +44,10 @@ public class FavoriteService {
     }
 
     @Transactional
-    public void removeFavorite(Long favoriteId, AuthenticatedUser currentUser) {
+    public void removeFavorite(Long jobPostId, AuthenticatedUser currentUser) {
         Candidate candidate = getCandidateByUserId(currentUser.getUserId());
 
-        Favorite favorite = favoriteRepository.findById(favoriteId)
+        Favorite favorite = favoriteRepository.findByCandidate_IdAndJobPost_Id(candidate.getId(), jobPostId)
                 .orElseThrow(() -> new ResourceNotFoundException("Favorite not found"));
 
         if (!favorite.getCandidate().getId().equals(candidate.getId()))

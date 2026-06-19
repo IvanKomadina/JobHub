@@ -1,5 +1,6 @@
 package com.jobhub.entity;
 
+import com.jobhub.enums.AssessmentStatus;
 import jakarta.persistence.*;
 import lombok.AccessLevel;
 import lombok.Builder;
@@ -62,6 +63,10 @@ public class ApplicationAssessment {
     @Column(name = "employer_notes", columnDefinition = "TEXT")
     private String employerNotes;
 
+    @Enumerated(EnumType.STRING)
+    @Column(name = "assessment_status", nullable = false, length = 50)
+    private AssessmentStatus assessmentStatus;
+
     @UpdateTimestamp
     @Column(name = "assessed_at", nullable = false)
     private LocalDateTime assessedAt;
@@ -72,7 +77,8 @@ public class ApplicationAssessment {
                                   BigDecimal experienceScore, BigDecimal educationScore,
                                   String skillsMatch, String skillsGap,
                                   String experienceAssessment, String educationAssessment,
-                                  String explanation, RecommendationType recommendation) {
+                                  String explanation, RecommendationType recommendation,
+                                  AssessmentStatus assessmentStatus) {
         this.application = application;
         this.matchScore = matchScore;
         this.semanticScore = semanticScore;
@@ -85,6 +91,15 @@ public class ApplicationAssessment {
         this.educationAssessment = educationAssessment;
         this.explanation = explanation;
         this.recommendation = recommendation;
+        this.assessmentStatus = assessmentStatus;;
+    }
+
+    public static ApplicationAssessment createPending(Application application) {
+        if (application == null) throw new IllegalArgumentException("Application cannot be null");
+        return ApplicationAssessment.builder()
+                .application(application)
+                .assessmentStatus(AssessmentStatus.PENDING)
+                .build();
     }
 
     public static ApplicationAssessment create(Application application,
@@ -150,5 +165,17 @@ public class ApplicationAssessment {
         if (score.compareTo(BigDecimal.ZERO) < 0 ||
                 score.compareTo(new BigDecimal("100")) > 0)
             throw new IllegalArgumentException(name + " must be between 0 and 100");
+    }
+
+    public void markGenerating() {
+        this.assessmentStatus = AssessmentStatus.GENERATING;
+    }
+
+    public void markFailed() {
+        this.assessmentStatus = AssessmentStatus.FAILED;
+    }
+
+    public void markCompleted() {
+        this.assessmentStatus = AssessmentStatus.COMPLETED;
     }
 }

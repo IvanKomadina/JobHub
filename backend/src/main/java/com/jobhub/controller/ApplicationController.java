@@ -54,6 +54,13 @@ public class ApplicationController {
             return ResponseEntity.noContent().build();
     }
 
+    @DeleteMapping("/candidate/applications/{applicationId}")
+    public ResponseEntity<Void> deleteDraft(@PathVariable Long applicationId,
+                                         @AuthenticationPrincipal AuthenticatedUser currentUser) {
+        applicationService.deleteDraftApplication(applicationId, currentUser);
+        return ResponseEntity.noContent().build();
+    }
+
     @GetMapping("/candidate/applications")
     public ResponseEntity<List<ApplicationResponse>> getMyApplications(
             @AuthenticationPrincipal AuthenticatedUser currentUser) {
