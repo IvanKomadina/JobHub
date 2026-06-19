@@ -8,6 +8,7 @@ import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import org.hibernate.annotations.CreationTimestamp;
+import org.hibernate.annotations.Formula;
 import org.hibernate.annotations.UpdateTimestamp;
 
 import java.math.BigDecimal;
@@ -64,6 +65,9 @@ public class JobPost {
     @Enumerated(EnumType.STRING)
     @Column(nullable = false, length = 50)
     private PostStatus status;
+
+    @Formula("(SELECT COUNT(a.id) FROM applications a WHERE a.job_post_id = id)")
+    private Long applicationCount;
 
     @Column(name = "published_at", nullable = false)
     private LocalDateTime publishedAt;

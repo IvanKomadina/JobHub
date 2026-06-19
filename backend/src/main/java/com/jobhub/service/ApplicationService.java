@@ -10,6 +10,7 @@ import com.jobhub.repository.*;
 import com.jobhub.security.AuthenticatedUser;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.context.ApplicationContext;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
@@ -33,6 +34,7 @@ public class ApplicationService {
     private final ResumeSkillRepository skillRepository;
     private final ResumeEducationRepository educationRepository;
     private final ResumeExperienceRepository experienceRepository;
+    private final ApplicationContext applicationContext;
 
     // CANDIDATE
 
@@ -74,7 +76,8 @@ public class ApplicationService {
         return ApplicationResponse.from(application);
     }
 
-    @Transactional
+
+    /*@Transactional
     public ApplicationResponse submitApplication(Long applicationId, AuthenticatedUser currentUser) {
         Candidate candidate = getCandidateByUserId(currentUser.getUserId());
         Application application = getApplicationOwnedByCandidate(applicationId, candidate);
@@ -88,7 +91,40 @@ public class ApplicationService {
             throw new IllegalStateException("You must upload a resume before submitting application");
 
         application.submit();
-        //applicationRepository.save(application);
+        return ApplicationResponse.from(application);
+    }*/
+
+    @Transactional
+    public ApplicationResponse submitApplication(Long applicationId,
+                                                 AuthenticatedUser currentUser) {
+        Candidate candidate = getCandidateByUserId(currentUser.getUserId());
+        Application application = getApplicationOwnedByCandidate(applicationId, candidate);
+
+        boolean hasDocuments = documentRepository
+                .findByApplication_Id(applicationId)
+                .stream()
+                .anyMatch(doc -> doc.getFileType() == DocumentType.RESUME);
+
+        if (!hasDocuments) {
+            throw new IllegalStateException("You must upload a CV before submitting");
+        }
+
+        application.submit();
+        applicationRepository.save(application);
+
+        // Create pending assessment record immediately
+        ApplicationAssessment pendingAssessment =
+                ApplicationAssessment.createPending(application);
+        assessmentRepository.save(pendingAssessment);
+
+        // Only trigger assessment directly if candidate has structured resume data
+        // (otherwise CvParsingService triggers it after parsing)
+        boolean hasStructuredData = hasAnyResumeContent(candidate.getId());
+        if (hasStructuredData) {
+            applicationContext.getBean(AssessmentAgentService.class)
+                    .generateAssessmentAsync(applicationId);
+        }
+
         return ApplicationResponse.from(application);
     }
 
@@ -102,7 +138,18 @@ public class ApplicationService {
             throw new AccessDeniedException("You do not have permission to withdraw this application");
 
         application.withdraw();
-        //applicationRepository.save(application);
+    }
+
+    @Transactional
+    public void deleteDraftApplication(Long applicationId, AuthenticatedUser currentUser) {
+        Candidate candidate = getCandidateByUserId(currentUser.getUserId());
+        Application application = getApplicationOwnedByCandidate(applicationId, candidate);
+
+        if (application.getStatus() != ApplicationStatus.DRAFT) {
+            throw new IllegalStateException("Only draft applications can be deleted");
+        }
+
+        applicationRepository.delete(application);
     }
 
     @Transactional(readOnly = true)
@@ -168,8 +215,24 @@ public class ApplicationService {
                         hasAnyResumeContent(candidate.getId());
 
                 if (!hasStructuredData) {
-                    cvParsingService.parseAndStoreResume(file, candidate);
-                    log.info("CV parsed and stored for candidate {}", candidate.getId());
+                    try {
+                        // Convert to bytes before async call
+                        // so the file stream doesn't close
+                        byte[] fileBytes = file.getBytes();
+                        String originalFilename = file.getOriginalFilename();
+                        String contentType = file.getContentType();
+
+                        applicationContext.getBean(CvParsingService.class)
+                                .parseAndStoreResumeAsync(
+                                        fileBytes,
+                                        originalFilename,
+                                        contentType,
+                                        candidate,
+                                        applicationId
+                                );
+                    } catch (Exception e) {
+                        log.error("Failed to trigger CV parsing: {}", e.getMessage());
+                    }
                 } else {
                     log.info("Candidate {} already has structured resume data, skipping parsing",
                             candidate.getId());
@@ -216,7 +279,13 @@ public class ApplicationService {
     public List<ApplicationResponse> getApplicationsForPost(Long jobPostId,
                                                             AuthenticatedUser currentUser) {
         verifyPostOwnership(jobPostId, currentUser.getUserId());
-        return applicationRepository.findByJobPost_Id(jobPostId)
+        return applicationRepository.findByJobPost_IdAndStatusNotIn(
+                    jobPostId,
+                    List.of(
+                        ApplicationStatus.DRAFT,
+                        ApplicationStatus.WITHDRAWN
+                    )
+                )
                 .stream()
                 .map(ApplicationResponse::from)
                 .toList();

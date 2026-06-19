@@ -2,6 +2,7 @@ package com.jobhub.repository;
 
 import com.jobhub.entity.JobPost;
 import com.jobhub.enums.PostStatus;
+import org.hibernate.annotations.Formula;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;

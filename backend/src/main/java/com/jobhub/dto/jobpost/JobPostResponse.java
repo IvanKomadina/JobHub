@@ -21,6 +21,7 @@ public class JobPostResponse {
     private BigDecimal salaryMin;
     private BigDecimal salaryMax;
     private PostStatus status;
+    private Long applicationCount;
     private LocalDateTime publishedAt;
     private LocalDateTime closesAt;
 
@@ -58,6 +59,7 @@ public class JobPostResponse {
                 .locationId(jobPost.getLocation() != null ? jobPost.getLocation().getId() : null)
                 .city(jobPost.getLocation() != null ? jobPost.getLocation().getCity() : null)
                 .country(jobPost.getLocation() != null ? jobPost.getLocation().getCountry() : null)
+                .applicationCount(jobPost.getApplicationCount())
                 .build();
     }
 }

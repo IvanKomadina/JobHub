@@ -172,7 +172,7 @@ public class AuthService {
         refreshTokenRepository.save(refreshToken);
 
         cookieService.addAccessTokenCookie(response, accessToken, jwtService.getExpiration());
-        cookieService.addRefreshCookie(response, refreshTokenValue, jwtService.getRefreshExpiration());
+        cookieService.addRefreshTokenCookie(response, refreshTokenValue, jwtService.getRefreshExpiration());
     }
 
     private void validateRoleSpecificFields(RegisterRequest request) {

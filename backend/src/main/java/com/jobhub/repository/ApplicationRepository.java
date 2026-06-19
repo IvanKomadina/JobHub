@@ -4,6 +4,7 @@ import com.jobhub.entity.Application;
 import com.jobhub.enums.ApplicationStatus;
 import org.springframework.data.jpa.repository.JpaRepository;
 
+import java.util.Collection;
 import java.util.List;
 import java.util.Optional;
 
@@ -14,4 +15,5 @@ public interface ApplicationRepository extends JpaRepository<Application, Long> 
     boolean existsByJobPost_IdAndCandidate_IdAndStatusNot(Long jobPostId, Long candidateId, ApplicationStatus status);
     long countByJobPost_Id(Long jobPostId);
     List<Application> findByJobPost_IdAndStatus(Long jobPostId, ApplicationStatus status);
+    List<Application> findByJobPost_IdAndStatusNotIn(Long jobPostId, Collection<ApplicationStatus> statuses);
 }

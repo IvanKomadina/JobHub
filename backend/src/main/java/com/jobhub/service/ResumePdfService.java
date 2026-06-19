@@ -26,6 +26,7 @@ import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.time.format.DateTimeFormatter;
 import java.util.List;
+import java.util.Locale;
 
 @Service
 @RequiredArgsConstructor
@@ -41,7 +42,8 @@ public class ResumePdfService {
     private static final DeviceRgb PRIMARY_COLOR = new DeviceRgb(30, 64, 175);
     private static final DeviceRgb LIGHT_GRAY = new DeviceRgb(243, 244, 246);
     private static final DeviceRgb TEXT_GRAY = new DeviceRgb(107, 114, 128);
-    private static final DateTimeFormatter DATE_FORMAT = DateTimeFormatter.ofPattern("MMM yyyy");
+    private static final DateTimeFormatter DATE_FORMAT =
+            DateTimeFormatter.ofPattern("MMM yyyy", Locale.ENGLISH);
 
     @Transactional(readOnly = true)
     public byte[] generateResumePdf(AuthenticatedUser currentUser) {

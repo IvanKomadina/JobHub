@@ -1,6 +1,7 @@
 package com.jobhub.dto.application;
 
 import com.jobhub.entity.ApplicationAssessment;
+import com.jobhub.enums.AssessmentStatus;
 import com.jobhub.enums.RecommendationType;
 import lombok.Builder;
 import lombok.Getter;
@@ -29,6 +30,7 @@ public class AssessmentResponse {
     private RecommendationType recommendation;
     private String employerNotes;
     private LocalDateTime assessedAt;
+    private AssessmentStatus assessmentStatus;
 
     public static AssessmentResponse from(ApplicationAssessment assessment) {
         return AssessmentResponse.builder()
@@ -47,6 +49,7 @@ public class AssessmentResponse {
                 .recommendation(assessment.getRecommendation())
                 .employerNotes(assessment.getEmployerNotes())
                 .assessedAt(assessment.getAssessedAt())
+                .assessmentStatus(assessment.getAssessmentStatus())
                 .build();
     }
 
