@@ -11,6 +11,7 @@ import Pagination from '../../components/ui/Pagination';
 import { jobPostApi } from '../../api/jobPostApi';
 import { formatDate, formatEmploymentType } from '../../utils/formatters';
 import toast from 'react-hot-toast';
+import Modal from '../../components/ui/Modal';
 
 const navItems = [
     { to: '/admin/dashboard', icon: <Briefcase size={18} />, label: 'Dashboard' },
@@ -35,6 +36,7 @@ export default function AdminPostsPage() {
     const queryClient = useQueryClient();
     const [page, setPage] = useState(0);
     const [statusFilter, setStatusFilter] = useState('');
+    const [deletePostId, setDeletePostId] = useState(null);
 
     const { data, isLoading } = useQuery({
         queryKey: ['admin-posts', page, statusFilter],
@@ -110,6 +112,9 @@ export default function AdminPostsPage() {
                                     <th className="text-left text-xs font-medium text-gray-500 uppercase tracking-wide px-6 py-3">
                                         Published
                                     </th>
+                                    <th className="text-left text-xs font-medium text-gray-500 uppercase tracking-wide px-6 py-3">
+                                        Applications
+                                    </th>
                                     <th className="text-right text-xs font-medium text-gray-500 uppercase tracking-wide px-6 py-3">
                                         Actions
                                     </th>
@@ -149,16 +154,17 @@ export default function AdminPostsPage() {
                                             </span>
                                         </td>
                                         <td className="px-6 py-4">
+                                            <span className="text-sm font-medium text-gray-900">
+                                                {post.applicationCount ?? 0}
+                                            </span>
+                                        </td>
+                                        <td className="px-6 py-4">
                                             <div className="flex justify-end">
                                                 {post.status !== 'DELETED' && (
                                                     <Button
                                                         variant="ghost"
                                                         size="sm"
-                                                        onClick={() => {
-                                                            if (confirm('Delete this post?')) {
-                                                                deleteMutation.mutate(post.id);
-                                                            }
-                                                        }}
+                                                        onClick={() => setDeletePostId(post.id)}
                                                     >
                                                         <Trash2 size={14} className="text-red-400" />
                                                     </Button>
@@ -178,6 +184,38 @@ export default function AdminPostsPage() {
                 totalPages={totalPages}
                 onPageChange={setPage}
             />
+
+            <Modal
+                isOpen={!!deletePostId}
+                onClose={() => setDeletePostId(null)}
+                title="Delete Job Post"
+                size="sm"
+            >
+                <p className="text-sm text-gray-600">
+                    Are you sure you want to delete this job post? This action cannot be undone.
+                </p>
+
+                <div className="flex gap-3 mt-6">
+                    <Button
+                        variant="secondary"
+                        className="flex-1"
+                        onClick={() => setDeletePostId(null)}
+                    >
+                        Cancel
+                    </Button>
+
+                    <Button
+                        variant="danger"
+                        className="flex-1"
+                        onClick={() => {
+                            deleteMutation.mutate(deletePostId);
+                            setDeletePostId(null);
+                        }}
+                    >
+                        Delete
+                    </Button>
+                </div>
+            </Modal>
         </DashboardLayout>
     );
 }

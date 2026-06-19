@@ -20,7 +20,7 @@ export default function Footer() {
                             <h4 className="text-white font-medium mb-3 text-sm">For Candidates</h4>
                             <ul className="space-y-2 text-sm">
                                 <li><Link to="/jobs" className="hover:text-white transition-colors">Browse Jobs</Link></li>
-                                <li><Link to="/register" className="hover:text-white transition-colors">Create Account</Link></li>
+                                {/* <li><Link to="/register" className="hover:text-white transition-colors">Create Account</Link></li> */}
                             </ul>
                         </div>
                         <div>

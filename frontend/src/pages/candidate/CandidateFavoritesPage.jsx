@@ -1,5 +1,5 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { Heart, Briefcase, FileText, MapPin, Trash2 } from 'lucide-react';
+import { Heart, Briefcase, FileText, MapPin, Trash2, User, Search } from 'lucide-react';
 import { Link, useNavigate } from 'react-router-dom';
 import DashboardLayout from '../../components/layout/DashboardLayout';
 import Card from '../../components/ui/Card';
@@ -11,10 +11,12 @@ import { formatDate } from '../../utils/formatters';
 import toast from 'react-hot-toast';
 
 const navItems = [
+    { to: '/jobs', icon: <Search size={18} />, label: 'Browse Jobs' },
     { to: '/candidate/dashboard', icon: <Briefcase size={18} />, label: 'Dashboard' },
     { to: '/candidate/applications', icon: <FileText size={18} />, label: 'My Applications' },
     { to: '/candidate/resume', icon: <FileText size={18} />, label: 'My Resume' },
     { to: '/candidate/favorites', icon: <Heart size={18} />, label: 'Saved Jobs' },
+    { to: '/candidate/profile', icon: <User size={18} />, label: 'My Profile' },
 ];
 
 export default function CandidateFavoritesPage() {
@@ -95,7 +97,7 @@ export default function CandidateFavoritesPage() {
                                     <Button
                                         variant="ghost"
                                         size="sm"
-                                        onClick={() => removeMutation.mutate(fav.id)}
+                                        onClick={() => removeMutation.mutate(fav.jobPostId)}
                                         isLoading={removeMutation.isPending}
                                     >
                                         <Trash2 size={16} className="text-red-500" />

@@ -1,8 +1,8 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import {
     FileText, Briefcase, Heart, Plus, Trash2,
-    Edit2, Download, ChevronDown, ChevronUp, X
+    Edit2, Download, ChevronDown, ChevronUp, X, User, Search
 } from 'lucide-react';
 import DashboardLayout from '../../components/layout/DashboardLayout';
 import Card from '../../components/ui/Card';
@@ -19,10 +19,12 @@ import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
 
 const navItems = [
+    { to: '/jobs', icon: <Search size={18} />, label: 'Browse Jobs' },
     { to: '/candidate/dashboard', icon: <Briefcase size={18} />, label: 'Dashboard' },
     { to: '/candidate/applications', icon: <FileText size={18} />, label: 'My Applications' },
     { to: '/candidate/resume', icon: <FileText size={18} />, label: 'My Resume' },
     { to: '/candidate/favorites', icon: <Heart size={18} />, label: 'Saved Jobs' },
+    { to: '/candidate/profile', icon: <User size={18} />, label: 'My Profile' },
 ];
 
 const SKILL_LEVELS = [
@@ -446,7 +448,7 @@ export default function CandidateResumePage() {
                                         key={lang.id}
                                         className="flex items-center gap-1.5 bg-gray-100 text-gray-700 rounded-full px-3 py-1 text-sm"
                                     >
-                                        <span>{lang.displayName}</span>
+                                        <span>{lang.languageName}</span>
                                         {lang.languageLevel && (
                                             <span className="text-gray-400 text-xs">
                                                 · {lang.languageLevel}
@@ -510,7 +512,21 @@ export default function CandidateResumePage() {
 function EducationModal({ isOpen, data, onClose, onSave }) {
     const { register, handleSubmit, reset, formState: { errors } } = useForm({
         resolver: zodResolver(educationSchema),
-        defaultValues: data || {},
+        values: data ? {
+            institution: data.institution || '',
+            degree: data.degree || '',
+            fieldOfStudy: data.fieldOfStudy || '',
+            startDate: data.startDate || '',
+            endDate: data.endDate || '',
+            description: data.description || '',
+        } : {
+            institution: '',
+            degree: '',
+            fieldOfStudy: '',
+            startDate: '',
+            endDate: '',
+            description: '',
+        },
     });
 
     const onSubmit = async (formData) => {
@@ -586,7 +602,21 @@ function EducationModal({ isOpen, data, onClose, onSave }) {
 function ExperienceModal({ isOpen, data, onClose, onSave }) {
     const { register, handleSubmit, reset, formState: { errors } } = useForm({
         resolver: zodResolver(experienceSchema),
-        defaultValues: data || {},
+        values: data ? {
+            company: data.company || '',
+            position: data.position || '',
+            location: data.location || '',
+            startDate: data.startDate || '',
+            endDate: data.endDate || '',
+            description: data.description || '',
+        } : {
+            company: '',
+            position: '',
+            location: '',
+            startDate: '',
+            endDate: '',
+            description: '',
+        },
     });
 
     const onSubmit = async (formData) => {
@@ -720,7 +750,7 @@ function LanguageModal({ isOpen, data, onClose, onSave }) {
     const { register, handleSubmit, reset, formState: { errors } } = useForm({
         resolver: zodResolver(languageSchema),
         defaultValues: data ? {
-            languageName: data.displayName,
+            languageName: data.languageName,
             languageLevel: data.languageLevel
         } : {},
     });

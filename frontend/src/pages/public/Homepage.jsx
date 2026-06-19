@@ -6,8 +6,10 @@ import { useQuery } from '@tanstack/react-query';
 import { jobPostApi } from '../../api/jobPostApi';
 import JobPostCard from '../../components/shared/JobPostCard';
 import Spinner from '../../components/ui/Spinner';
+import useAuthStore from '../../store/authStore';
 
 export default function HomePage() {
+    const { user } = useAuthStore();
     const { data, isLoading } = useQuery({
         queryKey: ['jobs', 'recent'],
         queryFn: () => jobPostApi.getAll({ page: 0, size: 6, sortBy: 'publishedAt', sortDirection: 'desc' }),
@@ -28,13 +30,13 @@ export default function HomePage() {
                     </p>
                     <div className="flex flex-col sm:flex-row gap-4 justify-center">
                         <Link to="/jobs">
-                            <Button size="lg" className="bg-white text-primary-700 hover:bg-primary-50 w-full sm:w-auto">
+                            <Button size="lg" className="text-primary-700 hover:bg-primary-50 w-full sm:w-auto">
                                 <Search size={18} className="mr-2" />
                                 Browse Jobs
                             </Button>
                         </Link>
                         <Link to="/register">
-                            <Button size="lg" variant="secondary" className="border-white text-white hover:bg-primary-800 w-full sm:w-auto bg-transparent">
+                            <Button size="lg" className="border-white text-white hover:bg-primary-50 w-full sm:w-auto">
                                 Post a Job
                             </Button>
                         </Link>
@@ -98,22 +100,24 @@ export default function HomePage() {
             </section>
 
             {/* CTA */}
-            <section className="bg-primary-50 border-t border-primary-100">
-                <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16 text-center">
-                    <h2 className="text-2xl font-bold text-gray-900 mb-3">
-                        Ready to take the next step?
-                    </h2>
-                    <p className="text-gray-600 mb-6">
-                        Join thousands of candidates and employers on JobHub.
-                    </p>
-                    <Link to="/register">
-                        <Button size="lg">
-                            Get Started Free
-                            <ArrowRight size={18} className="ml-2" />
-                        </Button>
-                    </Link>
-                </div>
-            </section>
+            {user == null && (
+                <section className="bg-primary-50 border-t border-primary-100">
+                    <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16 text-center">
+                        <h2 className="text-2xl font-bold text-gray-900 mb-3">
+                            Ready to take the next step?
+                        </h2>
+                        <p className="text-gray-600 mb-6">
+                            Join thousands of candidates and employers on JobHub.
+                        </p>
+                        <Link to="/register">
+                            <Button size="lg">
+                                Get Started Free
+                                <ArrowRight size={18} className="ml-2" />
+                            </Button>
+                        </Link>
+                    </div>
+                </section>
+            )}
         </PageLayout>
     );
 }
