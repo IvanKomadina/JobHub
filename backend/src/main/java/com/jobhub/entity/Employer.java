@@ -16,6 +16,7 @@ import java.time.LocalDateTime;
 @Getter
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 public class Employer {
+
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
@@ -33,8 +34,11 @@ public class Employer {
     @Column(length = 512)
     private String website;
 
-    @Column(length = 255)
-    private String location;
+    @Column(length = 100)
+    private String city;
+
+    @Column(length = 100)
+    private String country;
 
     @Column(name = "logo_url", length = 512)
     private String logoUrl;
@@ -69,13 +73,14 @@ public class Employer {
                 .build();
     }
 
-    public void updateProfile(String companyName, String industry, String website, String location,
-                              String description) {
+    public void updateProfile(String companyName, String industry, String website, String city,
+                              String country, String description) {
         if (companyName == null || companyName.isBlank()) throw new IllegalArgumentException("Company name cannot be empty");
         this.companyName = companyName;
         this.industry = industry;
         this.website = website;
-        this.location = location;
+        this.city = city;
+        this.country = country;
         this.description = description;
     }
 

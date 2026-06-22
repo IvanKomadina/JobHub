@@ -10,7 +10,7 @@ import lombok.Setter;
 public class JobPostFilterRequest {
     private String keyword;
     private Long categoryId;
-    private Long locationId;
+    private String location;
     private EmploymentType employmentType;
     private PostStatus postStatus;
     private Integer page = 0;

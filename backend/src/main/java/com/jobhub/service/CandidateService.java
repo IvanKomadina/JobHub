@@ -38,7 +38,8 @@ public class CandidateService {
                 request.getFirstName(),
                 request.getLastName(),
                 request.getPhone(),
-                request.getLocation(),
+                request.getCity(),
+                request.getCountry(),
                 request.getBio()
         );
         candidateRepository.save(candidate);

@@ -46,14 +46,14 @@ export default function Navbar() {
                     </Link>
 
                     {/* Nav links */}
-                    <div className="hidden md:flex items-center gap-6">
+                    {/* <div className="hidden md:flex items-center gap-6">
                         <Link
                             to="/jobs"
                             className="text-sm text-gray-600 hover:text-gray-900 transition-colors"
                         >
                             Browse Jobs
                         </Link>
-                    </div>
+                    </div>*/}
 
                     {/* Auth */}
                     <div className="flex items-center gap-3">

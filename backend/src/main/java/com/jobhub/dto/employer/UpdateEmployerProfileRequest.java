@@ -11,6 +11,7 @@ public class UpdateEmployerProfileRequest {
 
     private String industry;
     private String website;
-    private String location;
+    private String city;
+    private String country;
     private String description;
 }

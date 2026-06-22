@@ -148,7 +148,6 @@ export default function JobDetailPage() {
                                 </span>
                                 {(post.salaryMin || post.salaryMax) && (
                                     <span className="flex items-center gap-1 text-sm text-gray-500">
-                                        <DollarSign size={14} />
                                         {formatSalary(post.salaryMin, post.salaryMax)}
                                     </span>
                                 )}

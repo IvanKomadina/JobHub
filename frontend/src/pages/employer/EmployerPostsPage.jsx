@@ -47,7 +47,8 @@ const postSchema = z.object({
     salaryMin: z.string().optional(),
     salaryMax: z.string().optional(),
     categoryId: z.string().optional(),
-    locationId: z.string().optional(),
+    city: z.string().optional(),
+    country: z.string().optional(),
     closesAt: z.string().optional(),
 });
 
@@ -70,11 +71,6 @@ export default function EmployerPostsPage() {
     const { data: categoriesData } = useQuery({
         queryKey: ['categories'],
         queryFn: () => api.get('/api/categories'),
-    });
-
-    const { data: locationsData } = useQuery({
-        queryKey: ['locations'],
-        queryFn: () => api.get('/api/locations'),
     });
 
     const { data: profileData } = useQuery({
@@ -103,9 +99,6 @@ export default function EmployerPostsPage() {
     const posts = data?.data || [];
     const categories = categoriesData?.data?.map(c => ({
         value: String(c.id), label: c.name
-    })) || [];
-    const locations = locationsData?.data?.map(l => ({
-        value: String(l.id), label: `${l.city}, ${l.country}`
     })) || [];
     const canCreatePost = profileData?.data?.status === 'APPROVED';
 
@@ -223,7 +216,6 @@ export default function EmployerPostsPage() {
                 isOpen={postModal.open}
                 data={postModal.data}
                 categories={categories}
-                locations={locations}
                 onClose={() => setPostModal({ open: false, data: null })}
                 onSave={() => queryClient.invalidateQueries(['my-posts'])}
             />
@@ -233,7 +225,7 @@ export default function EmployerPostsPage() {
 
 // ==================== JOB POST MODAL ====================
 
-function JobPostModal({ isOpen, data, categories, locations, onClose, onSave }) {
+function JobPostModal({ isOpen, data, categories, onClose, onSave }) {
     const { register, handleSubmit, reset, formState: { errors } } = useForm({
         resolver: zodResolver(postSchema),
         values: data ? {
@@ -242,7 +234,8 @@ function JobPostModal({ isOpen, data, categories, locations, onClose, onSave }) 
             requirements: data.requirements || '',
             employmentType: data.employmentType || '',
             categoryId: data.categoryId ? String(data.categoryId) : '',
-            locationId: data.locationId ? String(data.locationId) : '',
+            city: data.city || '',
+            country: data.country || '',
             salaryMin: data.salaryMin ? String(data.salaryMin) : '',
             salaryMax: data.salaryMax ? String(data.salaryMax) : '',
             closesAt: data.closesAt ? data.closesAt.split('T')[0] : '',
@@ -252,7 +245,8 @@ function JobPostModal({ isOpen, data, categories, locations, onClose, onSave }) 
             requirements: '',
             employmentType: '',
             categoryId: '',
-            locationId: '',
+            city: '', 
+            country: '',
             salaryMin: '',
             salaryMax: '',
             closesAt: '',
@@ -263,7 +257,6 @@ function JobPostModal({ isOpen, data, categories, locations, onClose, onSave }) 
         const payload = {
             ...formData,
             categoryId: formData.categoryId ? Number(formData.categoryId) : null,
-            locationId: formData.locationId ? Number(formData.locationId) : null,
             salaryMin: formData.salaryMin ? Number(formData.salaryMin) : null,
             salaryMax: formData.salaryMax ? Number(formData.salaryMax) : null,
             closesAt: formData.closesAt ? `${formData.closesAt}T00:00:00` : null,
@@ -339,12 +332,18 @@ function JobPostModal({ isOpen, data, categories, locations, onClose, onSave }) 
                 </div>
 
                 <div className="grid grid-cols-2 gap-4">
-                    <Select
-                        label="Location"
-                        options={locations}
-                        placeholder="Select location"
-                        {...register('locationId')}
-                    />
+                    <div className="grid grid-cols-2 gap-4">
+                        <Input
+                            label="City"
+                            placeholder="Zagreb"
+                            {...register('city')}
+                        />
+                        <Input
+                            label="Country"
+                            placeholder="Croatia"
+                            {...register('country')}
+                        />
+                    </div>
                     <Input
                         label="Closing Date"
                         type="date"

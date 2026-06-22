@@ -7,18 +7,18 @@ import com.jobhub.dto.jobpost.UpdateJobPostRequest;
 import com.jobhub.entity.Category;
 import com.jobhub.entity.Employer;
 import com.jobhub.entity.JobPost;
-import com.jobhub.entity.Location;
 import com.jobhub.enums.EmployerStatus;
 import com.jobhub.enums.PostStatus;
 import com.jobhub.exception.AccessDeniedException;
 import com.jobhub.exception.ResourceNotFoundException;
 import com.jobhub.repository.CategoryRepository;
 import com.jobhub.repository.EmployerRepository;
+import com.jobhub.repository.FavoriteRepository;
 import com.jobhub.repository.JobPostRepository;
-import com.jobhub.repository.LocationRepository;
 import com.jobhub.security.AuthenticatedUser;
 import com.jobhub.specification.JobPostSpecification;
 import lombok.RequiredArgsConstructor;
+import org.springframework.context.ApplicationContext;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
@@ -36,7 +36,8 @@ public class JobPostService {
     private final JobPostRepository jobPostRepository;
     private final EmployerRepository employerRepository;
     private final CategoryRepository categoryRepository;
-    private final LocationRepository locationRepository;
+    private final ApplicationContext applicationContext;
+    private final FavoriteRepository favoriteRepository;
 
     // PUBLIC
 
@@ -70,22 +71,26 @@ public class JobPostService {
     public JobPostResponse createPost(CreateJobPostRequest request, AuthenticatedUser currentUser) {
         Employer employer = getApprovedEmployer(currentUser.getUserId());
         Category category = resolveCategory(request.getCategoryId());
-        Location location = resolveLocation(request.getLocationId());
 
         JobPost jobPost = JobPost.create(
                 employer,
                 category,
-                location,
                 request.getTitle(),
                 request.getDescription(),
                 request.getRequirements(),
                 request.getEmploymentType(),
                 request.getSalaryMin(),
                 request.getSalaryMax(),
+                request.getCity(),
+                request.getCountry(),
                 request.getClosesAt()
         );
 
         jobPostRepository.save(jobPost);
+
+        applicationContext.getBean(EmbeddingService.class)
+                .generateAndStoreJobPostEmbeddingAsync(jobPost.getId());
+
         return JobPostResponse.from(jobPost);
     }
 
@@ -94,21 +99,25 @@ public class JobPostService {
                                       AuthenticatedUser currentUser) {
         JobPost jobPost = getPostOwnedByEmployer(postId, currentUser.getUserId());
         Category category = resolveCategory(request.getCategoryId());
-        Location location = resolveLocation(request.getLocationId());
 
         jobPost.update(
                 category,
-                location,
                 request.getTitle(),
                 request.getDescription(),
                 request.getRequirements(),
                 request.getEmploymentType(),
                 request.getSalaryMin(),
                 request.getSalaryMax(),
+                request.getCity(),
+                request.getCountry(),
                 request.getClosesAt()
         );
 
         jobPostRepository.save(jobPost);
+
+        applicationContext.getBean(EmbeddingService.class)
+                .generateAndStoreJobPostEmbeddingAsync(jobPost.getId());
+
         return JobPostResponse.from(jobPost);
     }
 
@@ -120,6 +129,7 @@ public class JobPostService {
         }
         jobPost.delete();
         jobPostRepository.save(jobPost);
+        favoriteRepository.deleteByJobPost_Id(postId);
     }
 
     @Transactional
@@ -162,6 +172,7 @@ public class JobPostService {
         }
         jobPost.delete();
         jobPostRepository.save(jobPost);
+        favoriteRepository.deleteByJobPost_Id(postId);
     }
 
     // PRIVATE HELPERS
@@ -195,13 +206,5 @@ public class JobPostService {
 
         return categoryRepository.findById(categoryId)
                 .orElseThrow(() -> new ResourceNotFoundException("Category not found"));
-    }
-
-    private Location resolveLocation(Long locationId) {
-        if (locationId == null)
-            return null;
-
-        return locationRepository.findById(locationId)
-                .orElseThrow(() -> new ResourceNotFoundException("Location not found"));
     }
 }

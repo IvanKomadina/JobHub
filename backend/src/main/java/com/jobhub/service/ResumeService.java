@@ -7,6 +7,7 @@ import com.jobhub.exception.ResourceNotFoundException;
 import com.jobhub.repository.*;
 import com.jobhub.security.AuthenticatedUser;
 import lombok.RequiredArgsConstructor;
+import org.springframework.context.ApplicationContext;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -20,6 +21,7 @@ public class ResumeService {
     private final ResumeSkillRepository skillRepository;
     private final ResumeLanguageRepository languageRepository;
     private final CandidateRepository candidateRepository;
+    private final ApplicationContext applicationContext;
 
     // RESUME
 
@@ -32,6 +34,10 @@ public class ResumeService {
 
         Resume resume = Resume.create(candidate, request.getSummary());
         resumeRepository.save(resume);
+
+        applicationContext.getBean(EmbeddingService.class)
+                .generateAndStoreResumeEmbeddingAsync(resume.getId());
+
         return buildResumeResponse(resume);
     }
 
@@ -45,6 +51,8 @@ public class ResumeService {
     public ResumeResponse updateSummary(ResumeSummaryRequest request, AuthenticatedUser currentUser) {
         Resume resume = getResumeByUserId(currentUser.getUserId());
         resume.updateSummary(request.getSummary());
+        applicationContext.getBean(EmbeddingService.class)
+                .generateAndStoreResumeEmbeddingAsync(resume.getId());
         return buildResumeResponse(resume);
     }
 
@@ -65,6 +73,8 @@ public class ResumeService {
                 request.getSortOrder()
         );
         educationRepository.save(education);
+        applicationContext.getBean(EmbeddingService.class)
+                .generateAndStoreResumeEmbeddingAsync(resume.getId());
         return ResumeEducationResponse.from(education);
     }
 
@@ -73,6 +83,7 @@ public class ResumeService {
                                                    ResumeEducationRequest request,
                                                    AuthenticatedUser currentUser) {
         ResumeEducation education = getEducationOwnedByUser(educationId, currentUser.getUserId());
+        Long resumeId = education.getResume().getId();
         education.update(
                 request.getInstitution(),
                 request.getDegree(),
@@ -82,12 +93,17 @@ public class ResumeService {
                 request.getDescription(),
                 request.getSortOrder()
         );
+        applicationContext.getBean(EmbeddingService.class)
+                .generateAndStoreResumeEmbeddingAsync(resumeId);
         return ResumeEducationResponse.from(education);
     }
 
     @Transactional
     public void deleteEducation(Long educationId, AuthenticatedUser currentUser) {
         ResumeEducation education = getEducationOwnedByUser(educationId, currentUser.getUserId());
+        Long resumeId = education.getResume().getId();
+        applicationContext.getBean(EmbeddingService.class)
+                .generateAndStoreResumeEmbeddingAsync(resumeId);
         educationRepository.delete(education);
     }
 
@@ -108,6 +124,8 @@ public class ResumeService {
                 request.getSortOrder()
         );
         experienceRepository.save(experience);
+        applicationContext.getBean(EmbeddingService.class)
+                .generateAndStoreResumeEmbeddingAsync(resume.getId());
         return ResumeExperienceResponse.from(experience);
     }
 
@@ -116,6 +134,7 @@ public class ResumeService {
                                                      ResumeExperienceRequest request,
                                                      AuthenticatedUser currentUser) {
         ResumeExperience experience = getExperienceOwnedByUser(experienceId, currentUser.getUserId());
+        Long resumeId = experience.getResume().getId();
         experience.update(
                 request.getCompany(),
                 request.getPosition(),
@@ -125,12 +144,18 @@ public class ResumeService {
                 request.getDescription(),
                 request.getSortOrder()
         );
+
+        applicationContext.getBean(EmbeddingService.class)
+                .generateAndStoreResumeEmbeddingAsync(resumeId);
         return ResumeExperienceResponse.from(experience);
     }
 
     @Transactional
     public void deleteExperience(Long experienceId, AuthenticatedUser currentUser) {
         ResumeExperience experience = getExperienceOwnedByUser(experienceId, currentUser.getUserId());
+        Long resumeId = experience.getResume().getId();
+        applicationContext.getBean(EmbeddingService.class)
+                .generateAndStoreResumeEmbeddingAsync(resumeId);
         experienceRepository.delete(experience);
     }
 
@@ -150,6 +175,10 @@ public class ResumeService {
                 request.getSortOrder()
         );
         skillRepository.save(skill);
+
+        applicationContext.getBean(EmbeddingService.class)
+                .generateAndStoreResumeEmbeddingAsync(resume.getId());
+
         return ResumeSkillResponse.from(skill);
     }
 
@@ -157,13 +186,19 @@ public class ResumeService {
     public ResumeSkillResponse updateSkill(Long skillId, ResumeSkillRequest request,
                                            AuthenticatedUser currentUser) {
         ResumeSkill skill = getSkillOwnedByUser(skillId, currentUser.getUserId());
+        Long resumeId = skill.getResume().getId();
         skill.update(request.getSkillName(), request.getSkillLevel(), request.getSortOrder());
+        applicationContext.getBean(EmbeddingService.class)
+                .generateAndStoreResumeEmbeddingAsync(resumeId);
         return ResumeSkillResponse.from(skill);
     }
 
     @Transactional
     public void deleteSkill(Long skillId, AuthenticatedUser currentUser) {
         ResumeSkill skill = getSkillOwnedByUser(skillId, currentUser.getUserId());
+        Long resumeId = skill.getResume().getId();
+        applicationContext.getBean(EmbeddingService.class)
+                .generateAndStoreResumeEmbeddingAsync(resumeId);
         skillRepository.delete(skill);
     }
 
@@ -184,6 +219,10 @@ public class ResumeService {
                 request.getSortOrder()
         );
         languageRepository.save(language);
+
+        applicationContext.getBean(EmbeddingService.class)
+                .generateAndStoreResumeEmbeddingAsync(resume.getId());
+
         return ResumeLanguageResponse.from(language);
     }
 
@@ -191,13 +230,19 @@ public class ResumeService {
     public ResumeLanguageResponse updateLanguage(Long languageId, ResumeLanguageRequest request,
                                                  AuthenticatedUser currentUser) {
         ResumeLanguage language = getLanguageOwnedByUser(languageId, currentUser.getUserId());
+        Long resumeId = language.getResume().getId();
         language.update(request.getLanguageName(), request.getLanguageLevel(), request.getSortOrder());
+        applicationContext.getBean(EmbeddingService.class)
+                .generateAndStoreResumeEmbeddingAsync(resumeId);
         return ResumeLanguageResponse.from(language);
     }
 
     @Transactional
     public void deleteLanguage(Long languageId, AuthenticatedUser currentUser) {
         ResumeLanguage language = getLanguageOwnedByUser(languageId, currentUser.getUserId());
+        Long resumeId = language.getResume().getId();
+        applicationContext.getBean(EmbeddingService.class)
+                .generateAndStoreResumeEmbeddingAsync(resumeId);
         languageRepository.delete(language);
     }
 

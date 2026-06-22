@@ -31,7 +31,8 @@ const schema = z.object({
     firstName: z.string().min(1, 'First name is required'),
     lastName: z.string().min(1, 'Last name is required'),
     phone: z.string().optional(),
-    location: z.string().optional(),
+    city: z.string().optional(),
+    country: z.string().optional(),
     bio: z.string().optional(),
 });
 
@@ -55,7 +56,8 @@ export default function CandidateProfilePage() {
             firstName: profile.firstName || '',
             lastName: profile.lastName || '',
             phone: profile.phone || '',
-            location: profile.location || '',
+            city: profile.city || '',
+            country: profile.country || '',
             bio: profile.bio || '',
         } : {},
     });
@@ -140,11 +142,18 @@ export default function CandidateProfilePage() {
                             {...register('phone')}
                         />
 
-                        <Input
-                            label="Location"
-                            placeholder="Zagreb, Croatia"
-                            {...register('location')}
-                        />
+                        <div className="grid grid-cols-2 gap-4">
+                            <Input
+                                label="City"
+                                placeholder="Zagreb"
+                                {...register('city')}
+                            />
+                            <Input
+                                label="Country"
+                                placeholder="Croatia"
+                                {...register('country')}
+                            />
+                        </div>
 
                         <Textarea
                             label="Bio"

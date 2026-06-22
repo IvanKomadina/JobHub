@@ -141,13 +141,24 @@ public class ApplicationService {
     }
 
     @Transactional
-    public void deleteDraftApplication(Long applicationId, AuthenticatedUser currentUser) {
+    public void discardDraft(Long applicationId, AuthenticatedUser currentUser) {
         Candidate candidate = getCandidateByUserId(currentUser.getUserId());
         Application application = getApplicationOwnedByCandidate(applicationId, candidate);
 
         if (application.getStatus() != ApplicationStatus.DRAFT) {
-            throw new IllegalStateException("Only draft applications can be deleted");
+            throw new IllegalStateException("Only draft applications can be discarded");
         }
+
+        // Clean up any uploaded documents from storage first
+        List<ApplicationDocument> documents =
+                documentRepository.findByApplication_Id(applicationId);
+        documents.forEach(doc -> {
+            try {
+                storageService.delete(doc.getFileUrl());
+            } catch (Exception e) {
+                log.warn("Failed to delete document file: {}", e.getMessage());
+            }
+        });
 
         applicationRepository.delete(application);
     }

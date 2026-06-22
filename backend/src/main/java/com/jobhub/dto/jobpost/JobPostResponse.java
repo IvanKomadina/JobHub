@@ -35,7 +35,6 @@ public class JobPostResponse {
     private String categoryName;
 
     // Location info
-    private Long locationId;
     private String city;
     private String country;
 
@@ -56,9 +55,8 @@ public class JobPostResponse {
                 .companyLogo(jobPost.getEmployer().getLogoUrl())
                 .categoryId(jobPost.getCategory() != null ? jobPost.getCategory().getId() : null)
                 .categoryName(jobPost.getCategory() != null ? jobPost.getCategory().getName() : null)
-                .locationId(jobPost.getLocation() != null ? jobPost.getLocation().getId() : null)
-                .city(jobPost.getLocation() != null ? jobPost.getLocation().getCity() : null)
-                .country(jobPost.getLocation() != null ? jobPost.getLocation().getCountry() : null)
+                .city(jobPost.getCity())
+                .country(jobPost.getCountry())
                 .applicationCount(jobPost.getApplicationCount())
                 .build();
     }

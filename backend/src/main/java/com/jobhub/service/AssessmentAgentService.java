@@ -187,7 +187,7 @@ public class AssessmentAgentService {
                         ? "none" : String.join(", ", scoring.missingSkills())),
                 Map.entry("experienceAssessment", scoring.experienceAssessment()),
                 Map.entry("educationAssessment", scoring.educationAssessment()),
-                Map.entry("recommendation", recommendation.name())
+                Map.entry("recommendation", recommendation.name().toLowerCase())
         ));
 
         try {

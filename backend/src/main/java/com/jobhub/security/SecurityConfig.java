@@ -49,7 +49,6 @@ public class SecurityConfig {
                         .requestMatchers("/api/auth/**").permitAll()
                         .requestMatchers(HttpMethod.GET, "/api/posts/**").permitAll()
                         .requestMatchers(HttpMethod.GET, "/api/categories/**").permitAll()
-                        .requestMatchers(HttpMethod.GET, "/api/locations/**").permitAll()
 
                         // ===== ADMIN ENDPOINTS =====
                         .requestMatchers("/api/admin/**").hasRole("ADMINISTRATOR")

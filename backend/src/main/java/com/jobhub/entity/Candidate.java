@@ -33,8 +33,11 @@ public class Candidate {
     @Column(length = 30)
     private String phone;
 
-    @Column(length = 255)
-    private String location;
+    @Column(length = 100)
+    private String city;
+
+    @Column(length = 100)
+    private String country;
 
     @Column(name = "profile_picture", length = 512)
     private String profilePicture;
@@ -69,13 +72,15 @@ public class Candidate {
                 .build();
     }
 
-    public void updateProfile(String firstName, String lastName, String phone, String location, String bio) {
+    public void updateProfile(String firstName, String lastName, String phone, String city,
+                              String country, String bio) {
         if (firstName == null || firstName.isBlank()) throw new IllegalArgumentException("First name cannot be empty");
         if (lastName == null || lastName.isBlank()) throw new IllegalArgumentException("Last name cannot be empty");
         this.firstName = firstName;
         this.lastName = lastName;
         this.phone = phone;
-        this.location = location;
+        this.city = city;
+        this.country = country;
         this.bio = bio;
     }
 

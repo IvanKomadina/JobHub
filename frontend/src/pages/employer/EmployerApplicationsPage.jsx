@@ -82,22 +82,6 @@ export default function EmployerApplicationsPage() {
         onError: (e) => toast.error(e.response?.data?.message || 'Failed to update'),
     });
 
-    const handleGenerateAssessment = async (applicationId) => {
-        setAssessingId(applicationId);
-        try {
-            await applicationApi.generateAssessment(applicationId);
-            refetchAssessment();
-                queryClient.invalidateQueries({
-                queryKey: ['assessment', applicationId],
-            });
-            toast.success('Assessment generated!');
-        } catch (e) {
-            toast.error('Failed to generate assessment');
-        } finally {
-            setAssessingId(null);
-        }
-    };
-
     const applications = data?.data || [];
     const documents = docsData?.data || [];
     const assessment = assessmentData?.data;
@@ -270,17 +254,6 @@ export default function EmployerApplicationsPage() {
                                 <p className="text-sm font-medium text-gray-700">
                                     AI Assessment
                                 </p>
-                                {assessment?.assessmentStatus === 'COMPLETED' && (
-                                    <Button
-                                        size="sm"
-                                        variant="secondary"
-                                        onClick={() => handleGenerateAssessment(selectedApp.id)}
-                                        isLoading={assessingId === selectedApp.id}
-                                    >
-                                        <Brain size={14} className="mr-1" />
-                                        Regenerate
-                                    </Button>
-                                )}
                             </div>
 
                             {!assessment && (
@@ -311,7 +284,10 @@ export default function EmployerApplicationsPage() {
                                     <Button
                                         size="sm"
                                         variant="secondary"
-                                        onClick={() => handleGenerateAssessment(selectedApp.id)}
+                                        onClick={() => {
+                                            applicationApi.generateAssessment(selectedApp.id);
+                                            toast('Retrying assessment generation...');
+                                        }}
                                         isLoading={assessingId === selectedApp.id}
                                     >
                                         <Brain size={14} className="mr-1" />

@@ -16,8 +16,8 @@ export const applicationApi = {
         api.post(`/api/candidate/applications/${applicationId}/submit`),
     withdraw: (applicationId) =>
         api.patch(`/api/candidate/applications/${applicationId}/withdraw`),
-    deleteDraft: (applicationId) =>
-        api.delete(`/api/candidate/applications/${applicationId}`),
+    discardDraft: (applicationId) =>
+        api.delete(`/api/candidate/applications/${applicationId}/draft`),
     getMyApplications: () =>
         api.get('/api/candidate/applications'),
 
