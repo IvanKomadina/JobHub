@@ -59,14 +59,11 @@ export default function CandidateApplicationsPage() {
         },
     });
 
-    const deleteDraftMutation = useMutation({
-        mutationFn: applicationApi.deleteDraft,
+    const discardMutation = useMutation({
+        mutationFn: applicationApi.discardDraft,
         onSuccess: () => {
             queryClient.invalidateQueries(['my-applications']);
-            toast.success('Draft deleted');
-        },
-        onError: (error) => {
-            toast.error(error.response?.data?.message || 'Failed to delete draft');
+            toast.success('Draft discarded');
         },
     });
 
@@ -173,11 +170,12 @@ export default function CandidateApplicationsPage() {
                                     )}
                                     {app.status === 'DRAFT' && (
                                         <Button
-                                            variant="ghost"
+                                            variant="danger"
                                             size="sm"
-                                            onClick={() => {deleteDraftMutation.mutate(app.id)}}
+                                            onClick={() => discardMutation.mutate(app.id)}
+                                            isLoading={discardMutation.isPending}
                                         >
-                                            <Trash2 size={14} className="text-red-400" />
+                                            Discard
                                         </Button>
                                     )}
                                 </div>

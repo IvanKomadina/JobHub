@@ -13,16 +13,24 @@ import toast from 'react-hot-toast';
 const candidateSchema = z.object({
     email: z.string().email('Invalid email address'),
     password: z.string().min(8, 'Password must be at least 8 characters'),
+    confirmPassword: z.string().min(1, 'Please confirm your password'),
     role: z.literal('CANDIDATE'),
     firstName: z.string().min(1, 'First name is required'),
     lastName: z.string().min(1, 'Last name is required'),
+}).refine((data) => data.password === data.confirmPassword, {
+    message: 'Passwords do not match',
+    path: ['confirmPassword'],
 });
 
 const employerSchema = z.object({
     email: z.string().email('Invalid email address'),
     password: z.string().min(8, 'Password must be at least 8 characters'),
+    confirmPassword: z.string().min(1, 'Please confirm your password'),
     role: z.literal('EMPLOYER'),
     companyName: z.string().min(1, 'Company name is required'),
+}).refine((data) => data.password === data.confirmPassword, {
+    message: 'Passwords do not match',
+    path: ['confirmPassword'],
 });
 
 export default function RegisterPage() {
@@ -45,8 +53,9 @@ export default function RegisterPage() {
 
     const onSubmit = async (data) => {
         setIsLoading(true);
+        const { confirmPassword, ...payload } = data;
         try {
-            const response = await authApi.register({ ...data, role });
+            const response = await authApi.register({ ...payload, role });
             setUser(response.data);
             toast.success('Account created successfully!');
 
@@ -128,6 +137,14 @@ export default function RegisterPage() {
                             placeholder="At least 8 characters"
                             error={errors.password?.message}
                             {...register('password')}
+                        />
+
+                        <Input
+                            label="Confirm Password"
+                            type="password"
+                            placeholder="Repeat your password"
+                            error={errors.confirmPassword?.message}
+                            {...register('confirmPassword')}
                         />
 
                         {role === 'CANDIDATE' && (

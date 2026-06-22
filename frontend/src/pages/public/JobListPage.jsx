@@ -26,7 +26,7 @@ export default function JobListPage() {
     const [filters, setFilters] = useState({
         keyword: '',
         categoryId: '',
-        locationId: '',
+        location: '',
         employmentType: '',
         sortBy: 'publishedAt',
         sortDirection: 'desc',
@@ -36,11 +36,6 @@ export default function JobListPage() {
     const { data: categoriesData } = useQuery({
         queryKey: ['categories'],
         queryFn: () => api.get('/api/categories'),
-    });
-
-    const { data: locationsData } = useQuery({
-        queryKey: ['locations'],
-        queryFn: () => api.get('/api/locations'),
     });
 
     const { data, isLoading } = useQuery({
@@ -59,10 +54,6 @@ export default function JobListPage() {
         value: c.id, label: c.name
     })) || [];
 
-    const locations = locationsData?.data?.map(l => ({
-        value: l.id, label: `${l.city}, ${l.country}`
-    })) || [];
-
     const handleSearch = () => {
         setPage(0);
         setAppliedFilters(filters);
@@ -72,7 +63,7 @@ export default function JobListPage() {
         const reset = {
             keyword: '',
             categoryId: '',
-            locationId: '',
+            location: '',
             employmentType: '',
             sortBy: 'publishedAt',
             sortDirection: 'desc',
@@ -84,7 +75,7 @@ export default function JobListPage() {
 
     const hasActiveFilters = appliedFilters.keyword ||
         appliedFilters.categoryId ||
-        appliedFilters.locationId ||
+        appliedFilters.location ||
         appliedFilters.employmentType;
 
     return (
@@ -105,20 +96,18 @@ export default function JobListPage() {
                                 onKeyDown={(e) => e.key === 'Enter' && handleSearch()}
                             />
                         </div>
+                        <Input
+                            placeholder="Location"
+                            value={filters.location}
+                            onChange={(e) => setFilters(f => ({ ...f, location: e.target.value }))}
+                            onKeyDown={(e) => e.key === 'Enter' && handleSearch()}
+                        />
                         <Select
                             placeholder="All Categories"
                             options={categories}
                             value={filters.categoryId}
                             onChange={(e) => setFilters(f => ({
                                 ...f, categoryId: e.target.value
-                            }))}
-                        />
-                        <Select
-                            placeholder="All Locations"
-                            options={locations}
-                            value={filters.locationId}
-                            onChange={(e) => setFilters(f => ({
-                                ...f, locationId: e.target.value
                             }))}
                         />
                     </div>

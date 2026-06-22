@@ -26,7 +26,8 @@ const schema = z.object({
     companyName: z.string().min(1, 'Company name is required'),
     industry: z.string().optional(),
     website: z.string().optional(),
-    location: z.string().optional(),
+    city: z.string().optional(),
+    country: z.string().optional(),
     description: z.string().optional(),
 });
 
@@ -57,7 +58,8 @@ export default function EmployerProfilePage() {
             companyName: profile.companyName || '',
             industry: profile.industry || '',
             website: profile.website || '',
-            location: profile.location || '',
+            city: profile.city || '',
+            country: profile.country || '',
             description: profile.description || '',
         } : {},
     });
@@ -214,17 +216,24 @@ export default function EmployerProfilePage() {
                                 {...register('industry')}
                             />
                             <Input
-                                label="Location"
-                                placeholder="Zagreb, Croatia"
-                                {...register('location')}
+                                label="Website"
+                                placeholder="https://yourcompany.com"
+                                {...register('website')}
                             />
                         </div>
 
-                        <Input
-                            label="Website"
-                            placeholder="https://yourcompany.com"
-                            {...register('website')}
-                        />
+                        <div className="grid grid-cols-2 gap-4">
+                            <Input
+                                label="City"
+                                placeholder="Zagreb"
+                                {...register('city')}
+                            />
+                            <Input
+                                label="Country"
+                                placeholder="Croatia"
+                                {...register('country')}
+                            />
+                        </div>
 
                         <Textarea
                             label="Description"
