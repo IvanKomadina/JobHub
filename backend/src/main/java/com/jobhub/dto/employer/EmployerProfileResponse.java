@@ -14,7 +14,8 @@ public class EmployerProfileResponse {
     private String companyName;
     private String industry;
     private String website;
-    private String location;
+    private String city;
+    private String country;
     private String logoUrl;
     private String description;
     private EmployerStatus status;
@@ -26,7 +27,8 @@ public class EmployerProfileResponse {
                 .companyName(employer.getCompanyName())
                 .industry(employer.getIndustry())
                 .website(employer.getWebsite())
-                .location(employer.getLocation())
+                .city(employer.getCity())
+                .country(employer.getCountry())
                 .logoUrl(employer.getLogoUrl())
                 .description(employer.getDescription())
                 .status(employer.getStatus())

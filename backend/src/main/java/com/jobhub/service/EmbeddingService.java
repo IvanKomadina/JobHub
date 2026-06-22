@@ -11,6 +11,7 @@ import com.jobhub.repository.*;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.ai.embedding.EmbeddingModel;
+import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -44,6 +45,18 @@ public class EmbeddingService {
         log.info("Generated embedding for resume {}", resumeId);
     }
 
+    @Async("taskExecutor")
+    @Transactional
+    public void generateAndStoreJobPostEmbeddingAsync(Long jobPostId) {
+        try {
+            generateAndStoreJobPostEmbedding(jobPostId);
+            log.info("Async embedding generated for job post {}", jobPostId);
+        } catch (Exception e) {
+            log.error("Failed to generate embedding for job post {}: {}",
+                    jobPostId, e.getMessage());
+        }
+    }
+
     // ==================== JOB POST EMBEDDING ====================
 
     @Transactional
@@ -56,6 +69,18 @@ public class EmbeddingService {
 
         jobPostRepository.updateEmbedding(jobPostId, floatArrayToString(embedding));
         log.info("Generated embedding for job post {}", jobPostId);
+    }
+
+    @Async("taskExecutor")
+    @Transactional
+    public void generateAndStoreResumeEmbeddingAsync(Long resumeId) {
+        try {
+            generateAndStoreResumeEmbedding(resumeId);
+            log.info("Async embedding generated for resume {}", resumeId);
+        } catch (Exception e) {
+            log.error("Failed to generate embedding for resume {}: {}",
+                    resumeId, e.getMessage());
+        }
     }
 
     // ==================== SIMILARITY ====================

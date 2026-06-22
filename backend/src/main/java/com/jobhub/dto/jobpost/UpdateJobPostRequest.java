@@ -25,6 +25,7 @@ public class UpdateJobPostRequest {
     private BigDecimal salaryMin;
     private BigDecimal salaryMax;
     private Long categoryId;
-    private Long locationId;
+    private String city;
+    private String country;
     private LocalDateTime closesAt;
 }

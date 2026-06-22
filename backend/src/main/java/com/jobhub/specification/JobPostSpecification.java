@@ -40,12 +40,16 @@ public class JobPostSpecification {
                 ));
             }
 
-            // Filter by location
-            if (filter.getLocationId() != null) {
-                predicates.add(cb.equal(
-                        root.get("location").get("id"),
-                        filter.getLocationId()
-                ));
+            // Filter by location (city OR country)
+            if (filter.getLocation() != null && !filter.getLocation().isBlank()) {
+                String location = "%" + filter.getLocation().toLowerCase() + "%";
+
+                predicates.add(
+                        cb.or(
+                                cb.like(cb.lower(root.get("city")), location),
+                                cb.like(cb.lower(root.get("country")), location)
+                        )
+                );
             }
 
             // Filter by employment type

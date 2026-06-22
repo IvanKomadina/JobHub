@@ -132,8 +132,10 @@ public class ResumePdfService {
         contactLine.append(candidate.getUser().getEmail());
         if (candidate.getPhone() != null)
             contactLine.append(" • ").append(candidate.getPhone());
-        if (candidate.getLocation() != null)
-            contactLine.append(" • ").append(candidate.getLocation());
+        if (candidate.getCity() != null)
+            contactLine.append(" • ").append(candidate.getCity());
+        if (candidate.getCountry() != null)
+            contactLine.append(", ").append(candidate.getCountry());
 
         document.add(new Paragraph(contactLine.toString()))
                 .setFont(regular)

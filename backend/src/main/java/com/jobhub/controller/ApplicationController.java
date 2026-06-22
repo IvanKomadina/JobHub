@@ -54,10 +54,11 @@ public class ApplicationController {
             return ResponseEntity.noContent().build();
     }
 
-    @DeleteMapping("/candidate/applications/{applicationId}")
-    public ResponseEntity<Void> deleteDraft(@PathVariable Long applicationId,
-                                         @AuthenticationPrincipal AuthenticatedUser currentUser) {
-        applicationService.deleteDraftApplication(applicationId, currentUser);
+    @DeleteMapping("/candidate/applications/{applicationId}/draft")
+    public ResponseEntity<Void> discardDraft(
+            @PathVariable Long applicationId,
+            @AuthenticationPrincipal AuthenticatedUser currentUser) {
+        applicationService.discardDraft(applicationId, currentUser);
         return ResponseEntity.noContent().build();
     }
 

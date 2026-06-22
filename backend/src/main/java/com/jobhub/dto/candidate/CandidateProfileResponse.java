@@ -13,7 +13,8 @@ public class CandidateProfileResponse {
     private String firstName;
     private String lastName;
     private String phone;
-    private String location;
+    private String city;
+    private String country;
     private String profilePicture;
     private String bio;
 
@@ -24,7 +25,8 @@ public class CandidateProfileResponse {
                 .firstName(candidate.getFirstName())
                 .lastName(candidate.getLastName())
                 .phone(candidate.getPhone())
-                .location(candidate.getLocation())
+                .city(candidate.getCity())
+                .country(candidate.getCountry())
                 .profilePicture(candidate.getProfilePicture())
                 .bio(candidate.getBio())
                 .build();

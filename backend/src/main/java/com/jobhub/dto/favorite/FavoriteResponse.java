@@ -29,10 +29,8 @@ public class FavoriteResponse {
                 .jobPostTitle(favorite.getJobPost().getTitle())
                 .companyName(favorite.getJobPost().getEmployer().getCompanyName())
                 .companyLogo(favorite.getJobPost().getEmployer().getLogoUrl())
-                .city(favorite.getJobPost().getLocation() != null
-                        ? favorite.getJobPost().getLocation().getCity() : null)
-                .country(favorite.getJobPost().getLocation() != null
-                        ? favorite.getJobPost().getLocation().getCountry() : null)
+                .city(favorite.getJobPost().getCity())
+                .country(favorite.getJobPost().getCountry())
                 .build();
     }
 }

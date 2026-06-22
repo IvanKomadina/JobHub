@@ -19,7 +19,7 @@ import java.time.LocalDateTime;
         indexes = {
                 @Index(name = "idx_job_posts_status", columnList = "status"),
                 @Index(name = "idx_job_posts_category_id", columnList = "category_id"),
-                @Index(name = "idx_job_posts_location_id", columnList = "location_id"),
+                @Index(name = "idx_job_posts_city", columnList = "city"),
                 @Index(name = "idx_job_posts_employer_id", columnList = "employer_id"),
                 @Index(name = "idx_job_posts_published_at", columnList = "published_at DESC")
         })
@@ -38,10 +38,6 @@ public class JobPost {
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "category_id")
     private Category category;
-
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "location_id")
-    private Location location;
 
     @Column(nullable = false)
     private String title;
@@ -62,11 +58,22 @@ public class JobPost {
     @Column(name = "salary_max", precision = 12, scale = 2)
     private BigDecimal salaryMax;
 
+    @Column(length = 100)
+    private String city;
+
+    @Column(length = 100)
+    private String country;
+
     @Enumerated(EnumType.STRING)
     @Column(nullable = false, length = 50)
     private PostStatus status;
 
-    @Formula("(SELECT COUNT(a.id) FROM applications a WHERE a.job_post_id = id)")
+    @Formula("""
+    (SELECT COUNT(a.id)
+     FROM applications a
+     WHERE a.job_post_id = id
+       AND a.status <> 'DRAFT')
+    """)
     private Long applicationCount;
 
     @Column(name = "published_at", nullable = false)
@@ -87,26 +94,29 @@ public class JobPost {
     private LocalDateTime updatedAt;
 
     @Builder(access = AccessLevel.PRIVATE)
-    private JobPost(Employer employer, Category category, Location location, String title,
+    private JobPost(Employer employer, Category category, String title,
                     String description, String requirements, EmploymentType employmentType,
-                    BigDecimal salaryMin, BigDecimal salaryMax, LocalDateTime closesAt) {
+                    BigDecimal salaryMin, BigDecimal salaryMax, String city, String country,
+                    LocalDateTime closesAt) {
         this.employer = employer;
         this.category = category;
-        this.location = location;
         this.title = title;
         this.description = description;
         this.requirements = requirements;
         this.employmentType = employmentType;
         this.salaryMin = salaryMin;
         this.salaryMax = salaryMax;
+        this.city = city;
+        this.country = country;
         this.status = PostStatus.ACTIVE;
         this.publishedAt = LocalDateTime.now();
         this.closesAt = closesAt;
     }
 
-    public static JobPost create(Employer employer, Category category, Location location, String title,
+    public static JobPost create(Employer employer, Category category, String title,
                                  String description, String requirements, EmploymentType employmentType, BigDecimal salaryMin,
-                                 BigDecimal salaryMax, LocalDateTime closesAt) {
+                                 BigDecimal salaryMax, String city, String country,
+                                 LocalDateTime closesAt) {
 
         if (employer == null) throw new IllegalArgumentException("Employer cannot be null");
         if (title == null || title.isBlank()) throw new IllegalArgumentException("Title cannot be empty");
@@ -119,20 +129,22 @@ public class JobPost {
         return JobPost.builder()
                 .employer(employer)
                 .category(category)
-                .location(location)
                 .title(title)
                 .description(description)
                 .requirements(requirements)
                 .employmentType(employmentType)
                 .salaryMin(salaryMin)
                 .salaryMax(salaryMax)
+                .city(city)
+                .country(country)
                 .closesAt(closesAt)
                 .build();
     }
 
-    public void update(Category category, Location location, String title,
+    public void update(Category category, String title,
                        String description, String requirements, EmploymentType employmentType,
-                       BigDecimal salaryMin, BigDecimal salaryMax, LocalDateTime closesAt) {
+                       BigDecimal salaryMin, BigDecimal salaryMax, String city, String country,
+                       LocalDateTime closesAt) {
 
         if (title == null || title.isBlank()) throw new IllegalArgumentException("Title cannot be empty");
         if (description == null || description.isBlank()) throw new IllegalArgumentException("Description cannot be empty");
@@ -141,13 +153,14 @@ public class JobPost {
         if (this.status != PostStatus.ACTIVE) throw new IllegalStateException("Only active posts can be edited");
 
         this.category = category;
-        this.location = location;
         this.title = title;
         this.description = description;
         this.requirements = requirements;
         this.employmentType = employmentType;
         this.salaryMin = salaryMin;
         this.salaryMax = salaryMax;
+        this.city = city;
+        this.country = country;
         this.closesAt = closesAt;
     }
 

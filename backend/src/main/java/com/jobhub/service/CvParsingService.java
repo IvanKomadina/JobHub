@@ -42,6 +42,7 @@ public class CvParsingService {
     private final ObjectMapper objectMapper;
     private final ApplicationAssessmentRepository assessmentRepository;
     private final AssessmentAgentService assessmentAgentService;
+    private final EmbeddingService embeddingService;
 
     private static final String SYSTEM_PROMPT = """
             You are a CV parser. Extract structured information from CV text.
@@ -150,12 +151,14 @@ public class CvParsingService {
             Resume resume = resumeRepository.findByCandidate_Id(candidate.getId())
                     .orElseGet(() -> resumeRepository.save(Resume.create(candidate, null)));
 
-            // 4. Clear existing data
+            // 4. Clear existing data and store new
             clearExistingResumeData(resume.getId());
             storeParsedData(resume, jsonResponse);
 
-            // 5. Store parsed data
             log.info("Async CV parsing completed for candidate {}", candidate.getId());
+
+            // Generate embedding synchronously here since we're already on a background thread
+            embeddingService.generateAndStoreResumeEmbedding(resume.getId());
 
             // Trigger assessment since resume is ready
             assessmentAgentService.generateAssessmentAsync(applicationId);

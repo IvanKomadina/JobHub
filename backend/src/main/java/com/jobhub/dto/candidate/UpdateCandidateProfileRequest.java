@@ -13,6 +13,7 @@ public class UpdateCandidateProfileRequest {
     private String lastName;
 
     private String phone;
-    private String location;
+    private String city;
+    private String country;
     private String bio;
 }

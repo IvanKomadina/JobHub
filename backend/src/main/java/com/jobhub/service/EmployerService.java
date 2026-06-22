@@ -39,7 +39,8 @@ public class EmployerService {
                 request.getCompanyName(),
                 request.getIndustry(),
                 request.getWebsite(),
-                request.getLocation(),
+                request.getCity(),
+                request.getCountry(),
                 request.getDescription()
         );
         employerRepository.save(employer);
