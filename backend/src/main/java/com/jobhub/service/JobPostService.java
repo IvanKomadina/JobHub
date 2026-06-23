@@ -124,19 +124,19 @@ public class JobPostService {
     @Transactional
     public void deletePost(Long postId, AuthenticatedUser currentUser) {
         JobPost jobPost = getPostOwnedByEmployer(postId, currentUser.getUserId());
-        if (jobPost.getStatus() == PostStatus.DELETED) {
-            throw new IllegalStateException("Post already deleted");
-        }
-        jobPost.delete();
-        jobPostRepository.save(jobPost);
         favoriteRepository.deleteByJobPost_Id(postId);
+        jobPostRepository.deleteById(postId);
     }
 
     @Transactional
     public void closePost(Long postId, AuthenticatedUser currentUser) {
         JobPost jobPost = getPostOwnedByEmployer(postId, currentUser.getUserId());
+        if (jobPost.getStatus() == PostStatus.CLOSED) {
+            throw new IllegalStateException("Post already closed");
+        }
         jobPost.close();
         jobPostRepository.save(jobPost);
+        favoriteRepository.deleteByJobPost_Id(postId);
     }
 
     @Transactional(readOnly = true)
@@ -167,12 +167,8 @@ public class JobPostService {
     public void adminDeletePost(Long postId) {
         JobPost jobPost = jobPostRepository.findById(postId)
                 .orElseThrow(() -> new ResourceNotFoundException("Job post not found"));
-        if (jobPost.getStatus() == PostStatus.DELETED) {
-            throw new IllegalStateException("Post already deleted");
-        }
-        jobPost.delete();
-        jobPostRepository.save(jobPost);
         favoriteRepository.deleteByJobPost_Id(postId);
+        jobPostRepository.deleteById(postId);
     }
 
     // PRIVATE HELPERS

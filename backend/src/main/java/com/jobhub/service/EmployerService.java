@@ -51,6 +51,12 @@ public class EmployerService {
     public void deleteAccount(AuthenticatedUser currentUser) {
         User user = userRepository.findById(currentUser.getUserId())
                 .orElseThrow(() -> new ResourceNotFoundException("User not found"));
+        Employer employer = employerRepository.findByUser_Id(user.getId())
+                        .orElseThrow(() -> new ResourceNotFoundException("Employer not found"));
+        if (employer.getLogoUrl() != null) {
+            storageService.delete(employer.getLogoUrl());
+        }
+        employerRepository.delete(employer);
         userRepository.delete(user);
     }
 

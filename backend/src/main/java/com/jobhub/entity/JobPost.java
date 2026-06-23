@@ -169,10 +169,10 @@ public class JobPost {
         this.status = PostStatus.CLOSED;
     }
 
-    public void delete() {
+    /*public void delete() {
         if (this.status == PostStatus.DELETED) throw new IllegalStateException("Post is already deleted");
         this.status = PostStatus.DELETED;
-    }
+    }*/
 
     /*public void updateEmbedding(float[] embedding) {
         this.embedding = embedding;

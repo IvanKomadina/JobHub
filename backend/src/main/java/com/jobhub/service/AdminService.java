@@ -27,6 +27,7 @@ public class AdminService {
     private final JobPostRepository jobPostRepository;
     private final ApplicationRepository applicationRepository;
     private final CandidateRepository candidateRepository;
+    private final StorageService storageService;
 
     // USERS
 
@@ -53,8 +54,12 @@ public class AdminService {
             candidateRepository.findByUser_Id(userId)
                     .ifPresent(candidateRepository::delete);
         } else if (user.getRole() == UserRole.EMPLOYER) {
-            employerRepository.findByUser_Id(userId)
-                    .ifPresent(employerRepository::delete);
+            Employer employer = employerRepository.findByUser_Id(userId)
+                    .orElseThrow(() -> new ResourceNotFoundException("Employer not found"));
+            if (employer.getLogoUrl() != null) {
+                storageService.delete(employer.getLogoUrl());
+            }
+            employerRepository.delete(employer);
         }
         userRepository.delete(user);
     }

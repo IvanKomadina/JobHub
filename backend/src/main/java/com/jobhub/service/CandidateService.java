@@ -50,15 +50,8 @@ public class CandidateService {
     public void deleteAccount(AuthenticatedUser currentUser) {
         User user = userRepository.findById(currentUser.getUserId())
                 .orElseThrow(() -> new ResourceNotFoundException("User not found"));
-
-        if (user.getRole() == UserRole.CANDIDATE) {
-            candidateRepository.findByUser_Id(user.getId())
-                    .ifPresent(candidateRepository::delete);
-        } else if (user.getRole() == UserRole.EMPLOYER) {
-            employerRepository.findByUser_Id(user.getId())
-                    .ifPresent(employerRepository::delete);
-        }
-
+        candidateRepository.findByUser_Id(user.getId())
+                .ifPresent(candidateRepository::delete);
         userRepository.delete(user);
     }
 }
