@@ -6,7 +6,7 @@ import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
 import {
     Briefcase, FileText, Heart,
-    User, Trash2, Save, Search
+    User, Trash2, Save, Search, FileBox
 } from 'lucide-react';
 import DashboardLayout from '../../components/layout/DashboardLayout';
 import Card from '../../components/ui/Card';
@@ -21,7 +21,7 @@ import toast from 'react-hot-toast';
 const navItems = [
     { to: '/jobs', icon: <Search size={18} />, label: 'Browse Jobs' },
     { to: '/candidate/dashboard', icon: <Briefcase size={18} />, label: 'Dashboard' },
-    { to: '/candidate/applications', icon: <FileText size={18} />, label: 'My Applications' },
+    { to: '/candidate/applications', icon: <FileBox size={18} />, label: 'My Applications' },
     { to: '/candidate/resume', icon: <FileText size={18} />, label: 'My Resume' },
     { to: '/candidate/favorites', icon: <Heart size={18} />, label: 'Saved Jobs' },
     { to: '/candidate/profile', icon: <User size={18} />, label: 'My Profile' },
@@ -64,7 +64,10 @@ export default function CandidateProfilePage() {
 
     const updateMutation = useMutation({
         mutationFn: candidateApi.updateProfile,
-        onSuccess: () => toast.success('Profile updated successfully'),
+        onSuccess: () => {
+            toast.success('Profile updated successfully');
+            queryClient.invalidateQueries({ queryKey: ['candidate-profile'] });
+        },
         onError: (e) => toast.error(e.response?.data?.message || 'Failed to update profile'),
     });
 

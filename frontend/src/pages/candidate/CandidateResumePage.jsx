@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import {
-    FileText, Briefcase, Heart, Plus, Trash2,
+    FileText, Briefcase, Heart, Plus, Trash2, FileBox,
     Edit2, Download, ChevronDown, ChevronUp, X, User, Search
 } from 'lucide-react';
 import DashboardLayout from '../../components/layout/DashboardLayout';
@@ -21,16 +21,10 @@ import { z } from 'zod';
 const navItems = [
     { to: '/jobs', icon: <Search size={18} />, label: 'Browse Jobs' },
     { to: '/candidate/dashboard', icon: <Briefcase size={18} />, label: 'Dashboard' },
-    { to: '/candidate/applications', icon: <FileText size={18} />, label: 'My Applications' },
+    { to: '/candidate/applications', icon: <FileBox size={18} />, label: 'My Applications' },
     { to: '/candidate/resume', icon: <FileText size={18} />, label: 'My Resume' },
     { to: '/candidate/favorites', icon: <Heart size={18} />, label: 'Saved Jobs' },
     { to: '/candidate/profile', icon: <User size={18} />, label: 'My Profile' },
-];
-
-const SKILL_LEVELS = [
-    { value: 'BEGINNER', label: 'Beginner' },
-    { value: 'INTERMEDIATE', label: 'Intermediate' },
-    { value: 'ADVANCED', label: 'Advanced' },
 ];
 
 const LANGUAGE_LEVELS = [
@@ -65,7 +59,6 @@ const experienceSchema = z.object({
 
 const skillSchema = z.object({
     skillName: z.string().min(1, 'Skill name is required'),
-    skillLevel: z.string().optional(),
 });
 
 const languageSchema = z.object({
@@ -302,7 +295,7 @@ export default function CandidateResumePage() {
                                                 {exp.location && ` · ${exp.location}`}
                                             </p>
                                             <p className="text-xs text-gray-400 mt-0.5">
-                                                {exp.startDate} – {exp.current ? 'Present' : exp.endDate}
+                                                {exp.startDate && `${exp.startDate} – ${exp.current ? 'Present' : exp.endDate}`}
                                             </p>
                                             {exp.description && (
                                                 <p className="text-sm text-gray-500 mt-1">
@@ -363,7 +356,7 @@ export default function CandidateResumePage() {
                                                 {edu.institution}
                                             </p>
                                             <p className="text-xs text-gray-400 mt-0.5">
-                                                {edu.startDate} – {edu.endDate || 'Present'}
+                                                {edu.startDate && `${edu.startDate} – ${edu.endDate || 'Present'}`}
                                             </p>
                                         </div>
                                         <div className="flex gap-1">
@@ -411,11 +404,6 @@ export default function CandidateResumePage() {
                                         className="flex items-center gap-1.5 bg-primary-50 text-primary-700 rounded-full px-3 py-1 text-sm"
                                     >
                                         <span>{skill.displayName}</span>
-                                        {skill.skillLevel && (
-                                            <span className="text-primary-400 text-xs">
-                                                · {skill.skillLevel}
-                                            </span>
-                                        )}
                                         <button
                                             onClick={async () => {
                                                 await resumeApi.deleteSkill(skill.id);
@@ -568,7 +556,7 @@ function EducationModal({ isOpen, data, onClose, onSave }) {
                 <div className="grid grid-cols-2 gap-4">
                     <Input
                         label="Degree"
-                        placeholder="Bachelor's"
+                        placeholder="Bachelor"
                         {...register('degree')}
                     />
                     <Input
@@ -695,7 +683,6 @@ function SkillModal({ isOpen, data, onClose, onSave }) {
         resolver: zodResolver(skillSchema),
         defaultValues: data ? {
             skillName: data.displayName,
-            skillLevel: data.skillLevel
         } : {},
     });
 
@@ -734,12 +721,6 @@ function SkillModal({ isOpen, data, onClose, onSave }) {
                     placeholder="e.g. JavaScript"
                     error={errors.skillName?.message}
                     {...register('skillName')}
-                />
-                <Select
-                    label="Proficiency Level"
-                    options={SKILL_LEVELS}
-                    placeholder="Select level"
-                    {...register('skillLevel')}
                 />
             </div>
         </Modal>

@@ -1,5 +1,5 @@
 import { useQuery } from '@tanstack/react-query';
-import { FileText, Briefcase, Heart, ArrowRight, User, Search } from 'lucide-react';
+import { FileText, Briefcase, Heart, ArrowRight, User, Search, FileBox } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import DashboardLayout from '../../components/layout/DashboardLayout';
 import Card from '../../components/ui/Card';
@@ -14,7 +14,7 @@ import useAuthStore from '../../store/authStore';
 const navItems = [
     { to: '/jobs', icon: <Search size={18} />, label: 'Browse Jobs' },
     { to: '/candidate/dashboard', icon: <Briefcase size={18} />, label: 'Dashboard' },
-    { to: '/candidate/applications', icon: <FileText size={18} />, label: 'My Applications' },
+    { to: '/candidate/applications', icon: <FileBox size={18} />, label: 'My Applications' },
     { to: '/candidate/resume', icon: <FileText size={18} />, label: 'My Resume' },
     { to: '/candidate/favorites', icon: <Heart size={18} />, label: 'Saved Jobs' },
     { to: '/candidate/profile', icon: <User size={18} />, label: 'My Profile' },
@@ -57,7 +57,7 @@ export default function CandidateDashboard() {
         <DashboardLayout navItems={navItems}>
             <div className="mb-8">
                 <h1 className="text-2xl font-bold text-gray-900">
-                    Welcome back! 👋
+                    Dashboard Overview
                 </h1>
                 <p className="text-gray-500 mt-1">
                     Here's an overview of your job search activity.

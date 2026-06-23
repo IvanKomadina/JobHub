@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { useNavigate, useSearchParams, Link } from 'react-router-dom';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { ArrowLeft, Upload, X, FileText, Briefcase, Heart, User, Search } from 'lucide-react';
+import { ArrowLeft, Upload, X, FileText, Briefcase, Heart, User, Search, FileBox } from 'lucide-react';
 import DashboardLayout from '../../components/layout/DashboardLayout';
 import Card from '../../components/ui/Card';
 import Button from '../../components/ui/Button';
@@ -15,7 +15,7 @@ import toast from 'react-hot-toast';
 const navItems = [
     { to: '/jobs', icon: <Search size={18} />, label: 'Browse Jobs' },
     { to: '/candidate/dashboard', icon: <Briefcase size={18} />, label: 'Dashboard' },
-    { to: '/candidate/applications', icon: <FileText size={18} />, label: 'My Applications' },
+    { to: '/candidate/applications', icon: <FileBox size={18} />, label: 'My Applications' },
     { to: '/candidate/resume', icon: <FileText size={18} />, label: 'My Resume' },
     { to: '/candidate/favorites', icon: <Heart size={18} />, label: 'Saved Jobs' },
     { to: '/candidate/profile', icon: <User size={18} />, label: 'My Profile' },
@@ -47,7 +47,7 @@ export default function ApplyPage() {
             queryClient.invalidateQueries(['my-applications']);
             setApplicationId(data.data.id);
             setStep(2);
-            toast.success('Application draft created');
+            //toast.success('Application draft created');
         },
         onError: (error) => {
             toast.error(error.response?.data?.message || 'Failed to create application');

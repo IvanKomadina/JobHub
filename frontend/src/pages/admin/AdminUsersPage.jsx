@@ -174,16 +174,16 @@ export default function AdminUsersPage() {
                                     <th className="text-left text-xs font-medium text-gray-500 uppercase tracking-wide px-6 py-3">
                                         User
                                     </th>
-                                    <th className="text-left text-xs font-medium text-gray-500 uppercase tracking-wide px-6 py-3">
+                                    <th className="text-center text-xs font-medium text-gray-500 uppercase tracking-wide px-6 py-3">
                                         Role
                                     </th>
-                                    <th className="text-left text-xs font-medium text-gray-500 uppercase tracking-wide px-6 py-3">
+                                    <th className="text-center text-xs font-medium text-gray-500 uppercase tracking-wide px-6 py-3">
                                         Status
                                     </th>
-                                    <th className="text-left text-xs font-medium text-gray-500 uppercase tracking-wide px-6 py-3">
+                                    <th className="text-center text-xs font-medium text-gray-500 uppercase tracking-wide px-6 py-3">
                                         Joined
                                     </th>
-                                    <th className="text-right text-xs font-medium text-gray-500 uppercase tracking-wide px-6 py-3">
+                                    <th className="text-center text-xs font-medium text-gray-500 uppercase tracking-wide px-6 py-3">
                                         Actions
                                     </th>
                                 </tr>
@@ -202,13 +202,13 @@ export default function AdminUsersPage() {
                                                 {user.email}
                                             </p>
                                         </td>
-                                        <td className="px-6 py-4">
+                                        <td className="px-6 py-4 text-center">
                                             <Badge variant={roleVariant[user.role]}>
                                                 {user.role}
                                             </Badge>
                                         </td>
-                                        <td className="px-6 py-4">
-                                            <div className="flex flex-col gap-1">
+                                        <td className="px-6 py-4 text-center">
+                                            <div className="flex flex-col items-center gap-1">
                                                 <Badge variant={user.active ? 'success' : 'danger'}>
                                                     {user.active ? 'Active' : 'Inactive'}
                                                 </Badge>
@@ -219,13 +219,13 @@ export default function AdminUsersPage() {
                                                 )}
                                             </div>
                                         </td>
-                                        <td className="px-6 py-4">
+                                        <td className="px-6 py-4 text-center">
                                             <span className="text-sm text-gray-500">
                                                 {formatDate(user.createdAt)}
                                             </span>
                                         </td>
-                                        <td className="px-6 py-4">
-                                            <div className="flex items-center justify-end gap-2">
+                                        <td className="px-6 py-4 text-center">
+                                            <div className="flex items-center justify-center gap-2">
                                                 {/* Employer approval */}
                                                 {user.role === 'EMPLOYER' &&
                                                  user.employerStatus === 'PENDING' && (

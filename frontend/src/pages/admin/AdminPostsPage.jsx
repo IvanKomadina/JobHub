@@ -103,19 +103,19 @@ export default function AdminPostsPage() {
                                     <th className="text-left text-xs font-medium text-gray-500 uppercase tracking-wide px-6 py-3">
                                         Company
                                     </th>
-                                    <th className="text-left text-xs font-medium text-gray-500 uppercase tracking-wide px-6 py-3">
+                                    <th className="text-center text-xs font-medium text-gray-500 uppercase tracking-wide px-6 py-3">
                                         Type
                                     </th>
-                                    <th className="text-left text-xs font-medium text-gray-500 uppercase tracking-wide px-6 py-3">
+                                    <th className="text-center text-xs font-medium text-gray-500 uppercase tracking-wide px-6 py-3">
                                         Status
                                     </th>
-                                    <th className="text-left text-xs font-medium text-gray-500 uppercase tracking-wide px-6 py-3">
+                                    <th className="text-center text-xs font-medium text-gray-500 uppercase tracking-wide px-6 py-3">
                                         Published
                                     </th>
-                                    <th className="text-left text-xs font-medium text-gray-500 uppercase tracking-wide px-6 py-3">
+                                    <th className="text-center text-xs font-medium text-gray-500 uppercase tracking-wide px-6 py-3">
                                         Applications
                                     </th>
-                                    <th className="text-right text-xs font-medium text-gray-500 uppercase tracking-wide px-6 py-3">
+                                    <th className="text-center text-xs font-medium text-gray-500 uppercase tracking-wide px-6 py-3">
                                         Actions
                                     </th>
                                 </tr>
@@ -138,28 +138,28 @@ export default function AdminPostsPage() {
                                                 {post.companyName}
                                             </span>
                                         </td>
-                                        <td className="px-6 py-4">
+                                        <td className="px-6 py-4 text-center">
                                             <span className="text-sm text-gray-600">
                                                 {formatEmploymentType(post.employmentType)}
                                             </span>
                                         </td>
-                                        <td className="px-6 py-4">
+                                        <td className="px-6 py-4 text-center">
                                             <Badge variant={statusVariant[post.status]}>
                                                 {post.status}
                                             </Badge>
                                         </td>
-                                        <td className="px-6 py-4">
+                                        <td className="px-6 py-4 text-center">
                                             <span className="text-sm text-gray-500">
                                                 {formatDate(post.publishedAt)}
                                             </span>
                                         </td>
-                                        <td className="px-6 py-4">
+                                        <td className="px-6 py-4 text-center">
                                             <span className="text-sm font-medium text-gray-900">
                                                 {post.applicationCount ?? 0}
                                             </span>
                                         </td>
-                                        <td className="px-6 py-4">
-                                            <div className="flex justify-end">
+                                        <td className="px-6 py-4 text-center">
+                                            <div className="flex justify-center gap-2">
                                                 {post.status !== 'DELETED' && (
                                                     <Button
                                                         variant="ghost"
